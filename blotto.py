@@ -12,24 +12,33 @@ def main():
     global SCORE_MODE
     set_seed(42)
     
-    scenario = "w21"
-    extend_algos = ["w11", "w12"]
+    scenario = "w22"
+    extend_algos = ["w11", "w12", "w21"]
 
     SCORE_MODE = f"{scenario}"
-    MODE = 1
+    MODE = 2
+
+    assert score([0, 1, 1, 0, 1, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 20
 
     print(f"[Blotto] scenario={scenario}  mode={MODE}  extend_algos={extend_algos}")
     # algos_in = open(f"{scenario}_algos.txt", "r").read().splitlines()
     
-    # assert score([0,0,0,0,0,0,0,0,0,10],[0,0,0,0,0,0,0,0,0,0]) == -10
-    # [0, 0, 5, 10, 10, 9, 16, 23, 23, 4]
+    # w21:
+    # [0, 0, 0, 0, 0, 0, 0, 5, 44, 51] # mode=1
+    # [0, 0, 0, 0, 3, 8, 32, 37, 18, 2] # mode-1 with w12_algos extend
+    # [0, 0, 1, 2, 5, 7, 31, 34, 14, 6] mode-1 with good_algos extend
+    # [0, 0, 0, 0, 1, 1, 22, 27, 26, 23] arena on w11+w12
+    # [0, 0, 0, 0, 0, 1, 0, 5, 44, 50] # winner of good
+    # [0, 0, 1, 2, 6, 13, 28, 9, 0, 41] # arena on good
 
-    
-    
+
+    # w22:
+    # [0, 1, 4, 15, 22, 22, 23, 2, 7, 4] # arena on w11+w12
+
     if MODE == 1:
         # Add player data to list?
         # champion_pool.extend([json.loads(a) for a in open("w11_algos.txt", "r").read().splitlines()])
-        # champion_pool.extend([json.loads(a) for a in open("w12_algos.txt", "r").read().splitlines()])
+        # champion_pool.extend([json.loads(a) for a in open("good_algos.txt", "r").read().splitlines()])
         
         champion, champ_score = optimize(k=500, pool_size=100, mutation_strength=30, max_transfer=100)
         scores = [(s, tournament_score(s, champion_pool)) for s in champion_pool]
@@ -42,10 +51,7 @@ def main():
             print(l)   
 
 
-        algos_out = open("out_algos.txt", "w")
-        for l in sorted_scores:
-            algos_out.write(str(l[0]) + "\n")
-        algos_out.close()
+        write_algos(sorted_scores)
 
         # # add the main pool to the champion pool
         # for a in algos_in:
@@ -80,16 +86,12 @@ def main():
         for l in sorted_scores[-10:]:
             print(l)   
 
+        write_algos(sorted_scores)
 
-        algos_out = open("out_algos.txt", "w")
-        for l in sorted_scores:
-            algos_out.write(str(l[0]) + "\n")
-        algos_out.close()
-
-    else:
+    elif MODE == 3:
         #add the main pool  
-        for a in algos_in:
-            champion_pool.append(json.loads(a))
+        for e in extend_algos:
+            champion_pool.extend([json.loads(a) for a in open(f"{e}_algos.txt", "r").read().splitlines()])
 
         scores = [(s, tournament_score(s, champion_pool)) for s in champion_pool]
         sorted_scores = sorted(scores, key=lambda x: x[1], reverse=True)
@@ -97,10 +99,13 @@ def main():
         for l in sorted_scores:
             print(l)
 
-    
+        write_algos(sorted_scores)
 
-
-    
+def write_algos(sorted_scores):
+    algos_out = open("out_algos.txt", "w")
+    for l in sorted_scores:
+        algos_out.write(str(l[0]) + "\n")
+    algos_out.close()
  
 
 def set_seed(seed: int = 42) -> None:
@@ -148,6 +153,18 @@ def w21_score(s1, s2):
             s1_score.append(tower_pts[i])
     if s1_score:
         s1_score[0] *= 3
+    return sum(s1_score)
+
+# If you own tower N and you win N towers in total your score is doubled
+def w22_score(s1, s2):
+    s1_score = []
+    for i in range(10):
+        if s1[i] > s2[i]:
+            s1_score.append(tower_pts[i])
+    if len(s1_score) in s1_score:
+        s1_score *= 2
+        # if s1 == [0, 1, 4, 15, 22, 22, 23, 2, 7, 4]:
+        #     print(f"s1: {s1}, s2: {s2}, s1_score: {s1_score} with {len(s1_score)} towers won")
     return sum(s1_score)
 
 # ── Strategy generation ────────────────────────────────────────────────────────
