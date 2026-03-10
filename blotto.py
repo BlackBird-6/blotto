@@ -7,18 +7,21 @@ import json
 tower_pts = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 champion_pool = []
 SCORE_MODE: str = "w11"
+MIN_SOLDIERS = 0
 
 def main():
     global SCORE_MODE
     set_seed(42)
     
-    scenario = "w22"
-    extend_algos = ["w11", "w12", "w21"]
+    scenario = "w32"
+    extend_algos = ["w11", "w12", "w22", "extra"]
+    MODE = 3
 
     SCORE_MODE = f"{scenario}"
-    MODE = 2
+    
+    assert score([1, 0, 0, 1, 1, 0, 1, 0, 0, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == -1+4+5-7-10
 
-    assert score([0, 1, 1, 0, 1, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 20
+    # assert score([1, 1, 0, 1, 1, 0, 1, 0, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 1+2+4+5+7+9+10+1+4+9
 
     print(f"[Blotto] scenario={scenario}  mode={MODE}  extend_algos={extend_algos}")
     # algos_in = open(f"{scenario}_algos.txt", "r").read().splitlines()
@@ -30,17 +33,33 @@ def main():
     # [0, 0, 0, 0, 1, 1, 22, 27, 26, 23] arena on w11+w12
     # [0, 0, 0, 0, 0, 1, 0, 5, 44, 50] # winner of good
     # [0, 0, 1, 2, 6, 13, 28, 9, 0, 41] # arena on good
-
+    # [0, 0, 0, 0, 2, 3, 3, 27, 32, 33] arena on w11 WINS
 
     # w22:
     # [0, 1, 4, 15, 22, 22, 23, 2, 7, 4] # arena on w11+w12
+    # [0, 2, 4, 11, 16, 21, 22, 21, 1, 2] # arena on w11
+    
+    # w31:
+    # [1, 4, 5, 1, 12, 15, 2, 1, 28, 31] arena off w11 min_soldiers=1
+    # [0, 5, 6, 0, 12, 17, 2, 27, 28, 3] arena off w11
+    # [0, 3, 4, 0, 17, 22, 0, 23, 28, 3] arena off w11+w12
+    # [0, 2, 3, 0, 17, 22, 1, 23, 28, 4] arena off all
+    # [2, 3, 3, 2, 2, 22, 24, 3, 28, 11] arena off all min_soldiers=2
+    # [1, 2, 3, 1, 17, 22, 1, 23, 26, 4] arena off all but w21 min_soldiers=1
+    # [1, 5, 7, 1, 11, 17, 3, 22, 31, 2] arena off w11 + some mode 1 samples
+
+    # w32:
+    # [2, 5, 7, 2, 2, 23, 27, 24, 6, 2] arena off w11+w12
+    # [2, 2, 2, 2, 2, 2, 23, 32, 29, 4] arena off all probably killed by w21
+    # [2, 3, 3, 2, 2, 3, 25, 27, 28, 5] arena off all but w21 so maybe not
+    # [2, 4, 6, 9, 11, 21, 25, 21, 1, 0] arena off w11
 
     if MODE == 1:
         # Add player data to list?
         # champion_pool.extend([json.loads(a) for a in open("w11_algos.txt", "r").read().splitlines()])
         # champion_pool.extend([json.loads(a) for a in open("good_algos.txt", "r").read().splitlines()])
         
-        champion, champ_score = optimize(k=500, pool_size=100, mutation_strength=30, max_transfer=100)
+        champion, champ_score = optimize(k=200, pool_size=100, mutation_strength=30, max_transfer=100)
         scores = [(s, tournament_score(s, champion_pool)) for s in champion_pool]
         sorted_scores = sorted(scores, key=lambda x: x[1], reverse=True)
 
@@ -124,6 +143,10 @@ def score(s1, s2):
         return w21_score(s1, s2)
     elif SCORE_MODE == "w22":
         return w22_score(s1, s2)
+    elif SCORE_MODE == "w31":
+        return w31_score(s1, s2)
+    elif SCORE_MODE == "w32":
+        return w32_score(s1, s2)
     else:
         raise ValueError(f"Unknown SCORE_MODE: {SCORE_MODE!r}")
 
@@ -167,6 +190,33 @@ def w22_score(s1, s2):
         #     print(f"s1: {s1}, s2: {s2}, s1_score: {s1_score} with {len(s1_score)} towers won")
     return sum(s1_score)
 
+
+# If a player wins two or more consecutive towers, the first tower of each independent 
+# consecutive run is worth double.
+def w31_score(s1, s2):
+    s1_score = [0]
+    for i in range(10):
+        s1_score.append(tower_pts[i] if s1[i] > s2[i] else 0)
+    s1_score.append(0)
+    for i in range(1, len(s1_score)-1):
+        # Last tower wasn't won (start of a won) and this tower is, and the next tower is (run)
+        if s1_score[i-1] == 0 and s1_score[i] != 0 and s1_score[i+1] != 0:
+            s1_score[i] *= 2
+        # if s1 == [0, 1, 4, 15, 22, 22, 23, 2, 7, 4]:
+        #     print(f"s1: {s1}, s2: {s2}, s1_score: {s1_score} with {len(s1_score)} towers won")
+    return sum(s1_score)
+
+# If a player wins a tower not adjacent to any other towers won, it's worth negative
+def w32_score(s1, s2):
+    s1_score = [0]
+    for i in range(10):
+        s1_score.append(tower_pts[i] if s1[i] > s2[i] else 0)
+    s1_score.append(0)
+    for i in range(1, len(s1_score)-1):
+        if s1_score[i-1] == 0 and s1_score[i] != 0 and s1_score[i+1] == 0:
+            s1_score[i] *= -1
+    return sum(s1_score)
+    
 # ── Strategy generation ────────────────────────────────────────────────────────
 
 def random_strategy(total: int = 100, towers: int = 10) -> list[int]:
@@ -195,7 +245,7 @@ def mutate(strategy: list[int], strength: int = 10, max_transfer: int = 5) -> li
         recipient = random.randrange(towers)
         if donor == recipient:
             continue
-        transfer = random.randint(0, min(max_transfer, max(0, s[donor])))
+        transfer = random.randint(0, min(max_transfer, max(0, s[donor]-MIN_SOLDIERS)))
         s[donor] -= transfer
         s[recipient] += transfer
 
@@ -330,7 +380,7 @@ def optimize_arena(k: int = 10, pool_size: int = 1000, mutation_strength: int = 
         champion = new_champion
         champion_score = new_score
 
-        print("Submission score: " + str(tournament_score([1, 3, 7, 10, 6, 17, 23, 3, 2, 28], pool)))
+        print("Submission score: " + str(tournament_score([0, 0, 2, 2, 2, 2, 10, 18, 30, 34], pool)))
         # print("Submission score: " + str(tournament_score([3, 1, 2, 6, 14, 23, 24, 17, 10, 0], pool)))
 
     # ── Sanity checks ─────────────────────────────────────────────────────────
