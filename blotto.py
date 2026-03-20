@@ -6,53 +6,45 @@ import json
 # useful regex to filter algo text files: ^[^[].+$\n
 tower_pts = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 champion_pool = []
-SCORE_MODE: str = "w11"
+SCORE_MODE: str
 MIN_SOLDIERS = 0
+
+all_algos = ["w11", "w12", "w21", "w22", "w31", "w32", "w41", "w42"]
 
 def main():
     global SCORE_MODE
     set_seed(42)
     
-    scenario = "w32"
-    extend_algos = ["w11", "w12", "w22", "extra"]
+    scenario = "w41"
+    extend_algos = ["w41", ""]
     MODE = 3
 
-    SCORE_MODE = f"{scenario}"
-    
-    assert score([1, 0, 0, 1, 1, 0, 1, 0, 0, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == -1+4+5-7-10
 
-    # assert score([1, 1, 0, 1, 1, 0, 1, 0, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 1+2+4+5+7+9+10+1+4+9
+    SCORE_MODE = f"{scenario}"
+
+    # assert score([1, 1, 0, 1, 1, 0, 1, 0, 2, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 1+2+4+5+7+18
+    # assert score([1, 1, 0, 1, 1, 0, 1, 0, 1, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 2+2+4+5+7+9
+        
+
+    # assert score([1, 1, 0, 1, 1, 0, 1, 0, 1, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 0+1+3+4+6+8
+    # assert score([1, 1, 0, 1, 1, 0, 1, 0, 1, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 1]) == 0+1+3+4+6+8+6
 
     print(f"[Blotto] scenario={scenario}  mode={MODE}  extend_algos={extend_algos}")
     # algos_in = open(f"{scenario}_algos.txt", "r").read().splitlines()
     
-    # w21:
-    # [0, 0, 0, 0, 0, 0, 0, 5, 44, 51] # mode=1
-    # [0, 0, 0, 0, 3, 8, 32, 37, 18, 2] # mode-1 with w12_algos extend
-    # [0, 0, 1, 2, 5, 7, 31, 34, 14, 6] mode-1 with good_algos extend
-    # [0, 0, 0, 0, 1, 1, 22, 27, 26, 23] arena on w11+w12
-    # [0, 0, 0, 0, 0, 1, 0, 5, 44, 50] # winner of good
-    # [0, 0, 1, 2, 6, 13, 28, 9, 0, 41] # arena on good
-    # [0, 0, 0, 0, 2, 3, 3, 27, 32, 33] arena on w11 WINS
+    # w41:
+    # [1, 2, 6, 9, 2, 22, 23, 27, 6, 2] arena w11+w12
+    # [1, 1, 4, 5, 7, 4, 31, 1, 43, 3] arena w12
+    # [1, 2, 3, 2, 2, 2, 27, 28, 31, 2] arena all
+    # [1, 1, 4, 5, 7, 4, 31, 1, 43, 3] arena on w32
+    # [1, 2, 3, 2, 2, 15, 22, 23, 28, 2] arena w11+w21
+    # [1, 2, 3, 2, 3, 23, 27, 28, 7, 4] arena w12+w21
 
-    # w22:
-    # [0, 1, 4, 15, 22, 22, 23, 2, 7, 4] # arena on w11+w12
-    # [0, 2, 4, 11, 16, 21, 22, 21, 1, 2] # arena on w11
-    
-    # w31:
-    # [1, 4, 5, 1, 12, 15, 2, 1, 28, 31] arena off w11 min_soldiers=1
-    # [0, 5, 6, 0, 12, 17, 2, 27, 28, 3] arena off w11
-    # [0, 3, 4, 0, 17, 22, 0, 23, 28, 3] arena off w11+w12
-    # [0, 2, 3, 0, 17, 22, 1, 23, 28, 4] arena off all
-    # [2, 3, 3, 2, 2, 22, 24, 3, 28, 11] arena off all min_soldiers=2
-    # [1, 2, 3, 1, 17, 22, 1, 23, 26, 4] arena off all but w21 min_soldiers=1
-    # [1, 5, 7, 1, 11, 17, 3, 22, 31, 2] arena off w11 + some mode 1 samples
+    # w42:
+    # [2, 4, 3, 2, 2, 2, 23, 27, 3, 32] arena w11+w12 AND w11+w21 (yeah they gave the same strategy)
+    # [2, 2, 3, 2, 3, 2, 23, 28, 3, 32] arena all
+    # [2, 3, 3, 4, 4, 4, 22, 27, 28, 3] existing champion
 
-    # w32:
-    # [2, 5, 7, 2, 2, 23, 27, 24, 6, 2] arena off w11+w12
-    # [2, 2, 2, 2, 2, 2, 23, 32, 29, 4] arena off all probably killed by w21
-    # [2, 3, 3, 2, 2, 3, 25, 27, 28, 5] arena off all but w21 so maybe not
-    # [2, 4, 6, 9, 11, 21, 25, 21, 1, 0] arena off w11
 
     if MODE == 1:
         # Add player data to list?
@@ -135,19 +127,21 @@ def set_seed(seed: int = 42) -> None:
 
 def score(s1, s2):
     """Dispatch to the active scoring function (controlled by SCORE_MODE)."""
-    if SCORE_MODE == "w11":
-        return w11_score(s1, s2)
-    elif SCORE_MODE == "w12":
-        return w12_score(s1, s2)
-    elif SCORE_MODE == "w21":
-        return w21_score(s1, s2)
-    elif SCORE_MODE == "w22":
-        return w22_score(s1, s2)
-    elif SCORE_MODE == "w31":
-        return w31_score(s1, s2)
-    elif SCORE_MODE == "w32":
-        return w32_score(s1, s2)
-    else:
+    
+    SCORE_FUNCTIONS = {
+    "w11": w11_score,
+    "w12": w12_score,
+    "w21": w21_score,
+    "w22": w22_score,
+    "w31": w31_score,
+    "w32": w32_score,
+    "w41": w41_score,
+    "w42": w42_score,
+    }
+    
+    try:
+        return SCORE_FUNCTIONS[SCORE_MODE](s1, s2)
+    except KeyError:
         raise ValueError(f"Unknown SCORE_MODE: {SCORE_MODE!r}")
 
 # How much does s1 score in a game against s2?
@@ -215,6 +209,38 @@ def w32_score(s1, s2):
     for i in range(1, len(s1_score)-1):
         if s1_score[i-1] == 0 and s1_score[i] != 0 and s1_score[i+1] == 0:
             s1_score[i] *= -1
+    return sum(s1_score)
+
+#  If the index of the highest-indexed tower won is larger than that of the opponent
+#  then each tower you win is worth one point fewer
+def w41_score(s1, s2):
+    s1_score = []
+    highest_won = 0
+    for i in range(10):
+        if(s1[i] > s2[i]):
+            s1_score.append(tower_pts[i])
+            highest_won = 1
+        if s2[i] > s1[i]:
+            highest_won = 2
+    if highest_won == 1:
+        s1_score = [x - 1 for x in s1_score]
+    return sum(s1_score)
+    
+# For both players, the tower they won by the maximum margin is worth double
+def w42_score(s1, s2):
+    s1_score = []
+    s1_margin = []
+    for i in range(10):
+        if s1[i] > s2[i]:
+            s1_score.append(tower_pts[i])
+            s1_margin.append(s1[i] - s2[i])
+
+    if s1_margin:
+        max_margin = max(s1_margin)
+        for i in range(len(s1_score)):
+            if s1_margin[i] == max_margin:
+                s1_score[i] *= 2
+                break
     return sum(s1_score)
     
 # ── Strategy generation ────────────────────────────────────────────────────────
@@ -316,13 +342,14 @@ def optimize(k: int = 10, pool_size: int = 1000, mutation_strength: int = 10,
         new_champion = pool[best_idx]
         new_score = scores[best_idx]
 
-        print(f"  iter {iteration:>2}         -> champion score = {new_score:.4f}  strategy = {new_champion}")
+        if iteration % 10 == 0:
+            print(f"  iter {iteration:>2}         -> champion score = {new_score:.4f}  strategy = {new_champion}")
         champion = new_champion
         champion_score = new_score
         champion_pool.append(champion)
 
 
-        print("Submission score: " + str(tournament_score([2, 4, 6, 9, 11, 17, 24, 22, 2, 3], pool)))
+        # print("Submission score: " + str(tournament_score([2, 4, 6, 9, 11, 17, 24, 22, 2, 3], pool)))
         # print("Submission score: " + str(tournament_score([3, 1, 2, 6, 14, 23, 24, 17, 10, 0], pool)))
 
     # ── Sanity checks ─────────────────────────────────────────────────────────
@@ -376,11 +403,12 @@ def optimize_arena(k: int = 10, pool_size: int = 1000, mutation_strength: int = 
         new_champion = pool[best_idx]
         new_score = scores[best_idx]
 
-        print(f"  iter {iteration:>2}         -> champion score = {new_score:.4f}  strategy = {new_champion}")
+        if iteration % 10 == 0:
+            print(f"  iter {iteration:>2}         -> champion score = {new_score:.4f}  strategy = {new_champion}")
         champion = new_champion
         champion_score = new_score
 
-        print("Submission score: " + str(tournament_score([0, 0, 2, 2, 2, 2, 10, 18, 30, 34], pool)))
+        # print("Submission score: " + str(tournament_score([0, 0, 2, 2, 2, 2, 10, 18, 30, 34], pool)))
         # print("Submission score: " + str(tournament_score([3, 1, 2, 6, 14, 23, 24, 17, 10, 0], pool)))
 
     # ── Sanity checks ─────────────────────────────────────────────────────────
