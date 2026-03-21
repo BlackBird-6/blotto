@@ -9,20 +9,19 @@ champion_pool = []
 SCORE_MODE: str
 MIN_SOLDIERS = 0
 
-all_algos = ["w11", "w12", "w21", "w22", "w31", "w32", "w41", "w42", "w53"]
+all_algos = ["w11", "w12", "w21", "w22", "w31", "w32", "w41", "w42", "w51", "w52", "w53"]
 
 def main():
     global SCORE_MODE
     set_seed(42)
     
-    SCORE_MODE = "w11"
-    extend_algos = ["w11", "extra"]
-    MODE = 3
+    SCORE_MODE = "omni"
+    extend_algos = all_algos
+    MODE = 2
 
     # SCORE_MODE: Algorithm to use for scoring
     # extend_algos: Algorithms to add to the pool
     # MODE: 1 -- Optimize, 2 -- Optimize Arena, 3 -- Tournament Simulation
-
 
     sanity_check(SCORE_MODE)
     print(f"[Blotto] scenario={SCORE_MODE}  mode={MODE}  extend_algos={extend_algos}")
@@ -60,7 +59,9 @@ def main():
     # [11, 2, 7, 9, 6, 16, 21, 2, 1, 25] winner of w11 normalized to use 89 soldiers lol
 
     # I hypothesize that quite obviously everyones going to dump 11 on tower 1 and it'll just
-    # become standard blotto with 9 towers and 89 soldiers
+    # become standard blotto with 9 towers and 89 soldiers, there is no benefit to
+    # deviating because you're never winning tower 1 or whereever you move those 11 soldiers
+    # to (by rules), so you might as well take the loss on tower 1 ('cooperate' with the crowd)
 
     if MODE == 1:
         # Add player data to list?
@@ -117,6 +118,8 @@ def main():
 
     elif MODE == 3:
         #add the main pool  
+        print(f"[Blotto Tournament]  arena_size={len(champion_pool)}")
+
         for e in extend_algos:
             champion_pool.extend([json.loads(a) for a in open(f"{e}_algos.txt", "r").read().splitlines()])
 
@@ -156,6 +159,7 @@ def score(s1, s2):
     "w51": w51_score,
     "w52": w52_score,
     "w53": w53_score,
+    "omni": omni_score,
     }
     
     try:
@@ -306,6 +310,8 @@ def w53_score(s1, s2):
             s1_score.append(tower_pts[i])
     return sum(s1_score)
 
+def omni_score(s1, s2):
+    return w11_score(s1, s2) + w12_score(s1, s2) + w21_score(s1, s2) + w22_score(s1, s2) + w31_score(s1, s2) + w32_score(s1, s2) + w41_score(s1, s2) + w42_score(s1, s2) + w51_score(s1, s2) + w52_score(s1, s2) + w53_score(s1, s2)
 # Copy paste:
 # assert score([0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 0
 def sanity_check(scenario):
@@ -333,6 +339,8 @@ def sanity_check(scenario):
         assert score([1, 0, 0, 0, 0, 0, 0, 0, 0, 11], [0, 1, 0, 0, 0, 0, 0, 0, 0, 0]) == 1
         assert score([11, 0, 0, 0, 0, 0, 0, 0, 0, 1], [100, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 10
         assert score([1, 0, 0, 0, 0, 0, 0, 0, 0, 10], [0, 1, 0, 0, 0, 0, 0, 0, 0, 0]) == 11
+
+    # There is no sanity check for omni-score scenario because it is not sane.
 
 # ── Strategy generation ────────────────────────────────────────────────────────
 
@@ -473,7 +481,7 @@ def optimize_arena(k: int = 10, pool_size: int = 1000, mutation_strength: int = 
     towers           : number of towers (default 10)
     """
 
-    print(f"[Blotto Optimizer (Arena)]  k={k}  pool_size={pool_size}  mutation_strength={mutation_strength}")
+    print(f"[Blotto Optimizer (Arena)]  k={k}  pool_size={pool_size}  mutation_strength={mutation_strength}  arena_size={len(champion_pool)}")
 
     # ── Iteration 0: random seed pool ─────────────────────────────────────────
     pool = [random_strategy(total, towers) for _ in range(pool_size)]
