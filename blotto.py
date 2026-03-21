@@ -9,42 +9,58 @@ champion_pool = []
 SCORE_MODE: str
 MIN_SOLDIERS = 0
 
-all_algos = ["w11", "w12", "w21", "w22", "w31", "w32", "w41", "w42"]
+all_algos = ["w11", "w12", "w21", "w22", "w31", "w32", "w41", "w42", "w53"]
 
 def main():
     global SCORE_MODE
     set_seed(42)
     
-    scenario = "w41"
-    extend_algos = ["w41", ""]
+    SCORE_MODE = "w11"
+    extend_algos = ["w11", "extra"]
     MODE = 3
 
+    # SCORE_MODE: Algorithm to use for scoring
+    # extend_algos: Algorithms to add to the pool
+    # MODE: 1 -- Optimize, 2 -- Optimize Arena, 3 -- Tournament Simulation
 
-    SCORE_MODE = f"{scenario}"
 
-    # assert score([1, 1, 0, 1, 1, 0, 1, 0, 2, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 1+2+4+5+7+18
-    # assert score([1, 1, 0, 1, 1, 0, 1, 0, 1, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 2+2+4+5+7+9
-        
-
-    # assert score([1, 1, 0, 1, 1, 0, 1, 0, 1, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 0+1+3+4+6+8
-    # assert score([1, 1, 0, 1, 1, 0, 1, 0, 1, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 1]) == 0+1+3+4+6+8+6
-
-    print(f"[Blotto] scenario={scenario}  mode={MODE}  extend_algos={extend_algos}")
+    sanity_check(SCORE_MODE)
+    print(f"[Blotto] scenario={SCORE_MODE}  mode={MODE}  extend_algos={extend_algos}")
+    
     # algos_in = open(f"{scenario}_algos.txt", "r").read().splitlines()
     
-    # w41:
-    # [1, 2, 6, 9, 2, 22, 23, 27, 6, 2] arena w11+w12
-    # [1, 1, 4, 5, 7, 4, 31, 1, 43, 3] arena w12
-    # [1, 2, 3, 2, 2, 2, 27, 28, 31, 2] arena all
-    # [1, 1, 4, 5, 7, 4, 31, 1, 43, 3] arena on w32
-    # [1, 2, 3, 2, 2, 15, 22, 23, 28, 2] arena w11+w21
-    # [1, 2, 3, 2, 3, 23, 27, 28, 7, 4] arena w12+w21
+    # w51:
+    # [1, 1, 2, 2, 1, 2, 22, 26, 32, 11] existing champion
+    # [0, 0, 3, 2, 2, 2, 27, 23, 35, 6] arena all
+    # [0, 1, 1, 2, 2, 17, 23, 22, 28, 4] arena w11+w21
+    # [0, 0, 0, 0, 10, 4, 15, 22, 9, 40] optimized w51
+    # [0, 0, 1, 2, 2, 17, 23, 22, 29, 4] arena w11+w21 but I added one more zero
 
-    # w42:
-    # [2, 4, 3, 2, 2, 2, 23, 27, 3, 32] arena w11+w12 AND w11+w21 (yeah they gave the same strategy)
-    # [2, 2, 3, 2, 3, 2, 23, 28, 3, 32] arena all
-    # [2, 3, 3, 4, 4, 4, 22, 27, 28, 3] existing champion
+    # I hypothesize the distribution will be largely regular, thus the distribution will
+    # approximate w11+w21 (standard) distribution and we will go with arena w11+w21
 
+    # w52:
+    # [3, 3, 4, 13, 25, 21, 19, 3, 5, 4] existing champion
+    # [23, 2, 3, 4, 14, 22, 22, 2, 3, 5] arena all
+    # [25, 2, 3, 9, 2, 2, 23, 24, 6, 4] arena w11+w12
+    # [1, 23, 3, 4, 2, 17, 22, 22, 2, 4] arena w11+w21
+    # [22, 2, 3, 4, 2, 17, 21, 21, 2, 6] arena w11+w21 (seed 4002)
+    # [2, 23, 4, 4, 3, 15, 22, 22, 2, 3] arena w11+w21+w42
+    # [1, 4, 0, 3, 0, 3, 19, 20, 26, 24] optimized w52
+
+    # I hypothesize the distribution will be largely regular with a spike on tower 1 (to
+    # instantly clear the effects of the scenario), this largely doesnt change the strategy
+    # and there seems to be little benefit to assigning max to other towers,so we will go
+    # with arena w11+w21 again (with seed 4002 which outperforms others in all_algos tournament)
+
+
+    # w53:
+    # [11, 2, 3, 2, 3, 21, 23, 27, 3, 5] arena all
+    # [11, 3, 3, 8, 2, 17, 24, 27, 2, 3] arena w11+w21+w42
+    # [11, 2, 7, 9, 6, 16, 21, 2, 1, 25] winner of w11 normalized to use 89 soldiers lol
+
+    # I hypothesize that quite obviously everyones going to dump 11 on tower 1 and it'll just
+    # become standard blotto with 9 towers and 89 soldiers
 
     if MODE == 1:
         # Add player data to list?
@@ -137,6 +153,9 @@ def score(s1, s2):
     "w32": w32_score,
     "w41": w41_score,
     "w42": w42_score,
+    "w51": w51_score,
+    "w52": w52_score,
+    "w53": w53_score,
     }
     
     try:
@@ -242,7 +261,79 @@ def w42_score(s1, s2):
                 s1_score[i] *= 2
                 break
     return sum(s1_score)
+
+# If a player wins strictly more towers than the opponent, 
+# then each tower the player wins is worth one point fewer.
+def w51_score(s1, s2):
+    s1_score = []
+    s1_towers_won_delta = 0
+    for i in range(10):
+        if(s1[i] > s2[i]):
+            s1_score.append(tower_pts[i])
+            s1_towers_won_delta += 1
+        if s2[i] > s1[i]:
+            s1_towers_won_delta -= 1
+    if s1_towers_won_delta > 0:
+        s1_score = [x - 1 for x in s1_score]
+    return sum(s1_score)
+
+# If a player wins more than 1 tower, then the won tower with the maximum 
+# number of soldiers allocated by that player is worth 0 points. 
+# If there is a tie, the highest-indexed tower among them is worth 0.
+def w52_score(s1, s2):
+    s1_score = []
+    s1_allocatedmax = -1
+    s1_allocatedmax_idx = -1
+    for i in range(10):
+        if(s1[i] > s2[i]):
+            s1_score.append(tower_pts[i])
+            if s1[i] >= s1_allocatedmax:
+                s1_allocatedmax = s1[i]
+                s1_allocatedmax_idx = i
+    if s1_allocatedmax_idx != -1:
+        s1_score.append(-tower_pts[s1_allocatedmax_idx])
+    return sum(s1_score)
+
+# For each player, the lowest-indexed tower 
+# at which the player allocates more than 10 soldiers is worth 0 points.
+def w53_score(s1, s2):
+    s1_score = []
+    s1_firstallocation = min([i for i in range(10) if s1[i] > 10]) if any(s1[i] > 10 for i in range(10)) else -1
+    for i in range(10):
+        if i == s1_firstallocation:
+            continue
+        if(s1[i] > s2[i]):
+            s1_score.append(tower_pts[i])
+    return sum(s1_score)
+
+# Copy paste:
+# assert score([0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 0
+def sanity_check(scenario):
+    if scenario == "w41":
+        assert score([1, 1, 0, 1, 1, 0, 1, 0, 1, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 0+1+3+4+6+8
+        assert score([1, 1, 0, 1, 1, 0, 1, 0, 1, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 1]) == 0+1+3+4+6+8+6
+
+    if scenario == "w42":
+        assert score([1, 1, 0, 1, 1, 0, 1, 0, 2, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 1+2+4+5+7+18
+        assert score([1, 1, 0, 1, 1, 0, 1, 0, 1, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 2+2+4+5+7+9
     
+    if scenario == "w51":
+        assert score([1, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 0
+        assert score([1, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 1, 0, 0, 0, 0, 0, 0, 0, 0]) == 1
+        assert score([1, 0, 1, 0, 1, 0, 1, 0, 1, 0], [0, 1, 0, 1, 0, 1, 0, 1, 0, 1]) == 1+3+5+7+9
+        assert score([1, 0, 1, 0, 1, 0, 1, 0, 1, 0], [0, 1, 0, 1, 0, 1, 0, 1, 0, 0]) == 0+2+4+6+8
+    
+    if scenario == "w52":
+        assert score([1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 1
+        assert score([1, 0, 1, 0, 1, 0, 1, 0, 1, 0], [0, 1, 0, 1, 0, 1, 0, 1, 0, 0]) == 1+3+5+7+0
+        assert score([1, 0, 1, 0, 1, 0, 2, 0, 1, 0], [0, 1, 0, 1, 0, 1, 0, 1, 0, 0]) == 1+3+5+0+9
+    
+    if scenario == "w53":
+        assert score([11, 0, 0, 0, 0, 0, 0, 0, 0, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 10
+        assert score([1, 0, 0, 0, 0, 0, 0, 0, 0, 11], [0, 1, 0, 0, 0, 0, 0, 0, 0, 0]) == 1
+        assert score([11, 0, 0, 0, 0, 0, 0, 0, 0, 1], [100, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 10
+        assert score([1, 0, 0, 0, 0, 0, 0, 0, 0, 10], [0, 1, 0, 0, 0, 0, 0, 0, 0, 0]) == 11
+
 # ── Strategy generation ────────────────────────────────────────────────────────
 
 def random_strategy(total: int = 100, towers: int = 10) -> list[int]:
