@@ -8,6 +8,7 @@ tower_pts = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 champion_pool = []
 SCORE_MODE: str
 MIN_SOLDIERS = 0
+DONT_ENFORCE_SOLDIER_CAP = True
 
 all_algos = ["w11", "w12", "w21", "w22", "w31", "w32", "w41", "w42", "w51", "w52", "w53"]
 
@@ -15,8 +16,8 @@ def main():
     global SCORE_MODE
     set_seed(42)
     
-    SCORE_MODE = "w51"
-    extend_algos = ["w51", "extra"]
+    SCORE_MODE = "w63"
+    extend_algos = ["w63", "extra"]
     MODE = 3
 
     # SCORE_MODE: Algorithm to use for scoring
@@ -28,42 +29,44 @@ def main():
     
     # algos_in = open(f"algos/{scenario}_algos.txt", "r").read().splitlines()
     
-    # w51:
-    # [1, 1, 2, 2, 1, 2, 22, 26, 32, 11] existing champion
-    # [0, 0, 3, 2, 2, 2, 27, 23, 35, 6] arena all
-    # [0, 1, 1, 2, 2, 17, 23, 22, 28, 4] arena w11+w21
-    # [0, 0, 0, 0, 10, 4, 15, 22, 9, 40] optimized w51
-    # [0, 0, 1, 2, 2, 17, 23, 22, 29, 4] arena w11+w21 but I added one more zero
+   
+    # w61
+    # [5, 7, 10, 15, 18, 20, 22, 1, 1, 1] current champion
+    # [3, 5, 8, 13, 17, 22, 26, 2, 2, 2] arena all
 
-    # I hypothesize the distribution will be largely regular, thus the distribution will
-    # approximate w11+w21 (standard) distribution and we will go with arena w11+w21
-
-    # w52:
-    # [3, 3, 4, 13, 25, 21, 19, 3, 5, 4] existing champion
-    # [23, 2, 3, 4, 14, 22, 22, 2, 3, 5] arena all
-    # [25, 2, 3, 9, 2, 2, 23, 24, 6, 4] arena w11+w12
-    # [1, 23, 3, 4, 2, 17, 22, 22, 2, 4] arena w11+w21
-    # [22, 2, 3, 4, 2, 17, 21, 21, 2, 6] arena w11+w21 (seed 4002)
-    # [2, 23, 4, 4, 3, 15, 22, 22, 2, 3] arena w11+w21+w42
-    # [1, 4, 0, 3, 0, 3, 19, 20, 26, 24] optimized w52
-
-    # I hypothesize the distribution will be largely regular with a spike on tower 1 (to
-    # instantly clear the effects of the scenario), this largely doesnt change the strategy
-    # and there seems to be little benefit to assigning max to other towers,so we will go
-    # with arena w11+w21 again (with seed 4002 which outperforms others in all_algos tournament)
+    # Looks reasonable enough, 2 on last towers to claim them if others put 0 or 1 is good too
 
 
-    # w53:
-    # [11, 2, 3, 3, 3, 18, 24, 28, 3, 5] arena all
-    # [11, 2, 3, 4, 2, 2, 19, 27, 27, 3] arena w11+w21+w42
-    # [13, 3, 3, 4, 3, 15, 2, 26, 28, 3] arena w11+w21+w42 iter 50
+    # w62
+    # [0, 0, 0, 0, 0, 2, 24, 26, 26, 22] current champion (ah yes, from w32)
+    # [0, 0, 0, 4, 0, 22, 0, 28, 34, 12] arena all 
+    # [0, 0, 0, 2, 0, 22, 0, 28, 34, 14] arena all (modified)
 
-    # I hypothesize everyone will dump 11 on tower 1 (except those who dump 12)
-    # and the rest will be distributed somewhat regularly (i.e. like w11+w21+w42)
-    # so we will go with arena w11+w21+w42, iter 50 to beat those who dump 11 or 12
-    # (Noting if say 90% of people drop 11+ on tower 1, then there is no benefit
-    # to dropping 11 on tower 2 instead since then you won't gain points on t1 or t2)
+    # It is impossible to go off strictly past precedent because the first 5 towers will be
+    # devoid of any soldier allocations, though arena all still gives a valid looking allocation
 
+    # I also love the investment of soldiers in the 4th tower and think that's brilliant,
+    # so it's staying as the final solution (modified since dont think many others will come up with that)
+    # (it is also quite interesting that arena came up with that on its own)
+
+    # w63
+    # [3, 7, 2, 8, 1, 9, 5, 5, 2, 8] current champion (why did someone run this before this scenario?)
+    # [0, 0, 0, 1, 1, 1, 1, 1, 1, 1] arena all after I modified mutate function
+
+    # There is absolutely no past precedent and it might as well be impossible to simulate this one
+    # The worth of each tower in soldiers is [2, 4, 6, 8, 10, 12, 14, 16, 18, 20] so allocating
+    # any less than that and winning is strictly beneficial (losing is non-beneficial)
+    # However, if everyone else allocates a lot, then it is optimal to allocate practically nothing
+    
+    # (via level-k thinking):
+    # (k=0) Normal strategy as done before
+    # (k=1) Allocating practically nothing is optimal if everyone else allocates a lot
+    # (k=2) We'll allocate at least 1 to everything (except tower 1) to farm the all-0/1 strategies
+    # and then slowly increase from there and see how it goes
+
+    # [0, 1, 2, 2, 3, 3, 3, 4, 6, 6] strategy that I made up
+
+    
     if MODE == 1:   
         champion, champ_score = optimize(k=200, pool_size=100, mutation_strength=30, max_transfer=100)
         scores = [(s, tournament_score(s, champion_pool)) for s in champion_pool]
@@ -154,6 +157,9 @@ def score(s1, s2):
     "w51": w51_score,
     "w52": w52_score,
     "w53": w53_score,
+    "w61": w61_score,
+    "w62": w62_score,
+    "w63": w63_score,
     "omni": omni_score,
     }
     
@@ -306,6 +312,42 @@ def w53_score(s1, s2):
             s1_score.append(tower_pts[i])
     return sum(s1_score)
 
+# If a player wins consecutive towers, an arithmetic sequence of difference 3 is added 
+# to the consecutive streak. For example, if a player wins towers 5, 6, 7, 8, but not 4 and 9, 
+# then they are respectively worth 5 + 0, 6 + 1x3, 7 + 2x3, and 8 + 3x3.
+def w61_score(s1, s2):
+    s1_score = []
+    s1_bonus = 0
+    for i in range(10):
+        if(s1[i] > s2[i]):
+            s1_score.append(tower_pts[i] + s1_bonus)
+            s1_bonus += 3
+        else:
+            s1_bonus = 0
+    return sum(s1_score)
+
+# If a player wins both Tower i and Tower (11 - i), then both towers are worth 0.
+# (or i and 9-i when 0-indexed)
+def w62_score(s1, s2):
+    s1_score = []
+    s1_won = []
+    for i in range(10):
+        if(s1[i] > s2[i]):
+            if (9-i) in s1_won:
+                s1_score.remove(tower_pts[9-i])
+                continue
+            s1_won.append(i)
+            s1_score.append(tower_pts[i])
+    return sum(s1_score)
+
+# Any unused soldier is worth 0.5 point each.
+def w63_score(s1, s2):
+    score = 0
+    for i in range(10):
+        if s1[i] > s2[i]:
+            score += tower_pts[i]
+    return score + 0.5*(100-sum(s1))
+
 def omni_score(s1, s2):
     return w11_score(s1, s2) + w12_score(s1, s2) + w21_score(s1, s2) + w22_score(s1, s2) + w31_score(s1, s2) + w32_score(s1, s2) + w41_score(s1, s2) + w42_score(s1, s2) + w51_score(s1, s2) + w52_score(s1, s2) + w53_score(s1, s2)
 # Copy paste:
@@ -335,6 +377,20 @@ def sanity_check(scenario):
         assert score([10, 0, 0, 0, 0, 0, 0, 0, 0, 10], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 1+10
         assert score([11, 11, 11, 0, 0, 0, 0, 0, 0, 0], [11, 11, 10, 0, 0, 0, 0, 0, 0, 0]) == 0
         assert score([5, 5, 5, 5, 11, 11, 0, 0, 0, 0], [11, 11, 11, 0, 11, 10, 0, 0, 0, 0]) == 4
+
+    if scenario == "w61":
+       assert score([1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 1+2+3+4+5+6+7+8+9+10+3+6+9+12+15+18+21+24+27
+       assert score([1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 0, 1, 0, 0, 1, 0, 0, 1, 0]) == 1+2+3+4+5+3+7+8+3+10
+
+    if scenario == "w62":
+       assert score([1, 1, 0, 0, 0, 0, 0, 1, 0, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 2+8
+       assert score([1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 0
+       assert score([1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 0, 0, 0, 0, 1, 1, 0, 0]) == 3+4+9+10
+
+    if scenario == "w63":
+       assert score([0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 50
+       assert score([0, 0, 0, 0, 0, 0, 0, 0, 0, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 59.5
+       assert score([0, 0, 0, 0, 0, 0, 0, 0, 0, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0, 1]) == 49.5
 
     # There is no sanity check for omni-score scenario because it is not sane.
 
@@ -368,6 +424,10 @@ def mutate(strategy: list[int], strength: int = 10, max_transfer: int = 5) -> li
             continue
         transfer = random.randint(0, min(max_transfer, max(0, s[donor]-MIN_SOLDIERS)))
         s[donor] -= transfer
+
+        if DONT_ENFORCE_SOLDIER_CAP and random.randint(0, 1) == 1:
+            continue
+        
         s[recipient] += transfer
 
     return s
