@@ -47,7 +47,7 @@ def bar_colors(values, vmin=0, vmax=None):
 # ── Build the figure ─────────────────────────────────────────────────────────
 
 def main():
-    filepath = sys.argv[1] if len(sys.argv) > 1 else "out_algos.txt"
+    filepath = sys.argv[1] if len(sys.argv) > 1 else "algos/out_algos.txt"
     strategies = load_strategies(filepath)
     n_strats = len(strategies)
     n_towers = len(strategies[0])

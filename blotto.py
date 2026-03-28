@@ -15,9 +15,9 @@ def main():
     global SCORE_MODE
     set_seed(42)
     
-    SCORE_MODE = "omni"
-    extend_algos = all_algos
-    MODE = 2
+    SCORE_MODE = "w51"
+    extend_algos = ["w51", "extra"]
+    MODE = 3
 
     # SCORE_MODE: Algorithm to use for scoring
     # extend_algos: Algorithms to add to the pool
@@ -26,7 +26,7 @@ def main():
     sanity_check(SCORE_MODE)
     print(f"[Blotto] scenario={SCORE_MODE}  mode={MODE}  extend_algos={extend_algos}")
     
-    # algos_in = open(f"{scenario}_algos.txt", "r").read().splitlines()
+    # algos_in = open(f"algos/{scenario}_algos.txt", "r").read().splitlines()
     
     # w51:
     # [1, 1, 2, 2, 1, 2, 22, 26, 32, 11] existing champion
@@ -54,20 +54,17 @@ def main():
 
 
     # w53:
-    # [11, 2, 3, 2, 3, 21, 23, 27, 3, 5] arena all
-    # [11, 3, 3, 8, 2, 17, 24, 27, 2, 3] arena w11+w21+w42
-    # [11, 2, 7, 9, 6, 16, 21, 2, 1, 25] winner of w11 normalized to use 89 soldiers lol
+    # [11, 2, 3, 3, 3, 18, 24, 28, 3, 5] arena all
+    # [11, 2, 3, 4, 2, 2, 19, 27, 27, 3] arena w11+w21+w42
+    # [13, 3, 3, 4, 3, 15, 2, 26, 28, 3] arena w11+w21+w42 iter 50
 
-    # I hypothesize that quite obviously everyones going to dump 11 on tower 1 and it'll just
-    # become standard blotto with 9 towers and 89 soldiers, there is no benefit to
-    # deviating because you're never winning tower 1 or whereever you move those 11 soldiers
-    # to (by rules), so you might as well take the loss on tower 1 ('cooperate' with the crowd)
+    # I hypothesize everyone will dump 11 on tower 1 (except those who dump 12)
+    # and the rest will be distributed somewhat regularly (i.e. like w11+w21+w42)
+    # so we will go with arena w11+w21+w42, iter 50 to beat those who dump 11 or 12
+    # (Noting if say 90% of people drop 11+ on tower 1, then there is no benefit
+    # to dropping 11 on tower 2 instead since then you won't gain points on t1 or t2)
 
-    if MODE == 1:
-        # Add player data to list?
-        # champion_pool.extend([json.loads(a) for a in open("w11_algos.txt", "r").read().splitlines()])
-        # champion_pool.extend([json.loads(a) for a in open("good_algos.txt", "r").read().splitlines()])
-        
+    if MODE == 1:   
         champion, champ_score = optimize(k=200, pool_size=100, mutation_strength=30, max_transfer=100)
         scores = [(s, tournament_score(s, champion_pool)) for s in champion_pool]
         sorted_scores = sorted(scores, key=lambda x: x[1], reverse=True)
@@ -91,10 +88,8 @@ def main():
         #     print(l)
     elif MODE == 2:
 
-        # Add player data to list?
-        # champion_pool.extend([json.loads(a) for a in open("w11_algos.txt", "r").read().splitlines()])
         for e in extend_algos:
-            champion_pool.extend([json.loads(a) for a in open(f"{e}_algos.txt", "r").read().splitlines()])
+            champion_pool.extend([json.loads(a) for a in open(f"algos/{e}_algos.txt", "r").read().splitlines()])
         
         champion, champ_score = optimize_arena(k=200, pool_size=100, mutation_strength=30, max_transfer=100)
         print()
@@ -121,7 +116,7 @@ def main():
         print(f"[Blotto Tournament]  arena_size={len(champion_pool)}")
 
         for e in extend_algos:
-            champion_pool.extend([json.loads(a) for a in open(f"{e}_algos.txt", "r").read().splitlines()])
+            champion_pool.extend([json.loads(a) for a in open(f"algos/{e}_algos.txt", "r").read().splitlines()])
 
         scores = [(s, tournament_score(s, champion_pool)) for s in champion_pool]
         sorted_scores = sorted(scores, key=lambda x: x[1], reverse=True)
@@ -132,7 +127,7 @@ def main():
         write_algos(sorted_scores)
 
 def write_algos(sorted_scores):
-    algos_out = open("out_algos.txt", "w")
+    algos_out = open("algos/out_algos.txt", "w")
     for l in sorted_scores:
         algos_out.write(str(l[0]) + "\n")
     algos_out.close()
@@ -299,14 +294,15 @@ def w52_score(s1, s2):
     return sum(s1_score)
 
 # For each player, the lowest-indexed tower 
-# at which the player allocates more than 10 soldiers is worth 0 points.
+# at which the player allocates more than 10 soldiers AND WINS is worth 0 points.
 def w53_score(s1, s2):
     s1_score = []
-    s1_firstallocation = min([i for i in range(10) if s1[i] > 10]) if any(s1[i] > 10 for i in range(10)) else -1
+    s1_won = False
     for i in range(10):
-        if i == s1_firstallocation:
-            continue
         if(s1[i] > s2[i]):
+            if not s1_won and s1[i] > 10:
+                s1_won = True
+                continue
             s1_score.append(tower_pts[i])
     return sum(s1_score)
 
@@ -335,10 +331,10 @@ def sanity_check(scenario):
         assert score([1, 0, 1, 0, 1, 0, 2, 0, 1, 0], [0, 1, 0, 1, 0, 1, 0, 1, 0, 0]) == 1+3+5+0+9
     
     if scenario == "w53":
-        assert score([11, 0, 0, 0, 0, 0, 0, 0, 0, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 10
-        assert score([1, 0, 0, 0, 0, 0, 0, 0, 0, 11], [0, 1, 0, 0, 0, 0, 0, 0, 0, 0]) == 1
-        assert score([11, 0, 0, 0, 0, 0, 0, 0, 0, 1], [100, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 10
-        assert score([1, 0, 0, 0, 0, 0, 0, 0, 0, 10], [0, 1, 0, 0, 0, 0, 0, 0, 0, 0]) == 11
+        assert score([11, 0, 0, 0, 0, 0, 0, 0, 0, 10], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 10
+        assert score([10, 0, 0, 0, 0, 0, 0, 0, 0, 10], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 1+10
+        assert score([11, 11, 11, 0, 0, 0, 0, 0, 0, 0], [11, 11, 10, 0, 0, 0, 0, 0, 0, 0]) == 0
+        assert score([5, 5, 5, 5, 11, 11, 0, 0, 0, 0], [11, 11, 11, 0, 11, 10, 0, 0, 0, 0]) == 4
 
     # There is no sanity check for omni-score scenario because it is not sane.
 
