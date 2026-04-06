@@ -21,6 +21,9 @@ def score(s1, s2):
     "w61": w61_score,
     "w62": w62_score,
     "w63": w63_score,
+    "w71": w71_score,
+    "w72": w72_score,
+    "w73": w73_score,
     "omni": omni_score,
     }
     
@@ -205,5 +208,54 @@ def w63_score(s1, s2):
             score += tower_pts[i]
     return score + 0.5*(100-sum(s1))
 
+# For each player, if they allocate at least 20 soldiers to a tower, 
+# that tower becomes high risk: if they win it, it is worth double; 
+# if they lose it, it is worth negative. In case of a tie, the tower is worth 0 points.
+def w71_score(s1, s2):
+    s1_score = 0
+    for i in range(10):
+        if s1[i] >= 20:
+            if s1[i] > s2[i]:
+                s1_score += 2*tower_pts[i]
+            elif s1[i] < s2[i]:
+                s1_score -= tower_pts[i]
+        elif s1[i] > s2[i]:
+            s1_score += tower_pts[i]
+    return s1_score
+
+# For each player, if they win more even-indexed towers than odd-indexed towers, 
+# all even-indexed towers they win are worth 0 points. If they win more odd-indexed 
+# towers than even-indexed towers, all odd-indexed towers they win are worth 0 points. 
+# If the counts are equal, no towers are worth 0.
+def w72_score(s1, s2):
+    s1_odd_score = []
+    s1_even_score = []
+    for i in range(10):
+        if s1[i] > s2[i]:
+            if i % 2 == 0:
+                s1_even_score.append(tower_pts[i])
+            else:
+                s1_odd_score.append(tower_pts[i])
+
+    if len(s1_odd_score) > len(s1_even_score):
+        return sum(s1_even_score)
+    elif len(s1_even_score) > len(s1_odd_score):
+        return sum(s1_odd_score)
+    else:
+        return sum(s1_odd_score) + sum(s1_even_score)
+
+# For each player, if they win a tower by allocating at least twice as many soldiers
+# as the opponent, that tower is worth half its normal value.
+def w73_score(s1, s2):
+    s1_score = 0
+    for i in range(10):
+        if s1[i] > s2[i]:
+            if s1[i] >= 2*s2[i]:
+                s1_score += tower_pts[i]/2
+            else:
+                s1_score += tower_pts[i]
+    return s1_score
+
+# All previous scenarios at the same time, combined together.
 def omni_score(s1, s2):
     return w11_score(s1, s2) + w12_score(s1, s2) + w21_score(s1, s2) + w22_score(s1, s2) + w31_score(s1, s2) + w32_score(s1, s2) + w41_score(s1, s2) + w42_score(s1, s2) + w51_score(s1, s2) + w52_score(s1, s2) + w53_score(s1, s2)

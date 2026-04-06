@@ -10,23 +10,64 @@ from sanity_checks import sanity_check
 champion_pool = []
 SCORE_MODE: str
 MIN_SOLDIERS = 0
-DONT_ENFORCE_SOLDIER_CAP = True
+DONT_ENFORCE_SOLDIER_CAP = False # Only used for w63
 
-all_algos = ["w11", "w12", "w21", "w22", "w31", "w32", "w41", "w42", "w51", "w52", "w53"]
-
+all_algos = ["w11", "w12", "w21", "w22", "w31", "w32", "w41", "w42", "w51", "w52", "w53", "w61", "w62", "w63"]
+later_algos = ["w41", "w42", "w51", "w52", "w53", "w61", "w62", "w63"]
 def main():
     global SCORE_MODE
     set_seed(42)
 
+    # SCORE_MODE: Algorithm to use for scoring (e.g. w71 for week 7 scenario 1)
+    # extend_algos: Algorithms to add to the pool as a list of strings (e.g. ["w11", "w12"])
+    # MODE: 1 -- Optimize, 2 -- Optimize (Arena), 3 -- Tournament Simulation
+    # SHOW_ALL_SCORES: Whether to show all scores or just the top and bottom 10 (Modes 1/2)
+    # SHOW_ALL_TOURNEY_SCORES: SHOW_ALL_SCORES (Mode 3)
+
     ############### EDIT THESE ##############    
-    SCORE_MODE = "w63"
-    extend_algos = ["w63", "extra"]
+    SCORE_MODE = "w11"
+    extend_algos = all_algos + ["extra"]
     MODE = 3
+    SHOW_ALL_SCORES = False
+    SHOW_ALL_TOURNEY_SCORES = True
     #########################################
 
-    # SCORE_MODE: Algorithm to use for scoring
-    # extend_algos: Algorithms to add to the pool
-    # MODE: 1 -- Optimize, 2 -- Optimize Arena, 3 -- Tournament Simulation
+
+    # w71
+    # [1, 2, 3, 2, 2, 2, 26, 27, 33, 2] current champion
+    # [1, 1, 2, 2, 2, 2, 27, 28, 2, 33] arena all
+    # [0, 0, 1, 1, 2, 1, 0, 28, 34, 33] arena on w41 onwards
+    # [1, 1, 1, 2, 3, 2, 2, 3, 43, 42] arena on w62
+
+    # previously arena all has worked pretty well but I am skeptical that the
+    # distribution will probably be irregular and front-focused due to the gimmick
+    # w62 follows essentially exactly what I expect the distribution to be like,
+    # and so I will choose arena on that for my strategy
+
+    # w72
+    # [0, 1, 1, 2, 2, 1, 24, 23, 23, 23] current champion
+    # [2, 2, 9, 0, 0, 21, 26, 1, 2, 37] arena all
+    # [1, 1, 4, 4, 11, 11, 2, 2, 32, 32] strategy I made up
+    
+    # I feel like anything I come up with in arena is going to be overfitted
+    # and wont have any relation to what people will put in the actual tournament
+    # so this will be another time I submit manually
+    # I suspect people will want to pair all of their soldiers, and if everyone
+    # does this, then anyone who does not do this puts themselves
+    # at a disadvantage (because you won't win/lose towers in even pairs and thus lose score)
+    # So, I will also pair my soldiers for essentially 5 tower blotto 
+
+    # w73
+    # [2, 3, 3, 4, 4, 4, 22, 27, 28, 3] current champion (this is also current champion on w11 vs all algos)
+    # [1, 3, 3, 3, 3, 2, 24, 27, 29, 5] arena all (this also wins on w11 rules vs all algos) (seed 402 b/c I forgot to change it back)
+    # [1, 3, 3, 3, 13, 19, 23, 27, 3, 5] arena all (seed 42) (this also wins on w11 vs all algos)
+    # [1, 3, 4, 4, 3, 22, 24, 28, 6, 5] arena all ON W11 RULES (this also wins on w73 vs all algos)
+    # [3, 3, 5, 5, 3, 19, 25, 29, 3, 5] arena on later algos
+
+    # As expected this scenario is practically identical to w11, since you will in
+    # practice never encounter the gimmick if you just play soldiers which are close
+    # to what other people play, which is already what you should be doing anyway
+    # so I will just use arena all and that's a wrap on Colonel Blotto!
 
     scoring.SCORE_MODE = SCORE_MODE
     sanity_check(SCORE_MODE)
@@ -35,41 +76,7 @@ def main():
     # algos_in = open(f"algos/{scenario}_algos.txt", "r").read().splitlines()
     
    
-    # w61
-    # [5, 7, 10, 15, 18, 20, 22, 1, 1, 1] current champion
-    # [3, 5, 8, 13, 17, 22, 26, 2, 2, 2] arena all
-
-    # Looks reasonable enough, 2 on last towers to claim them if others put 0 or 1 is good too
-
-
-    # w62
-    # [0, 0, 0, 0, 0, 2, 24, 26, 26, 22] current champion (ah yes, from w32)
-    # [0, 0, 0, 4, 0, 22, 0, 28, 34, 12] arena all 
-    # [0, 0, 0, 2, 0, 22, 0, 28, 34, 14] arena all (modified)
-
-    # It is impossible to go off strictly past precedent because the first 5 towers will be
-    # devoid of any soldier allocations, though arena all still gives a valid looking allocation
-
-    # I also love the investment of soldiers in the 4th tower and think that's brilliant,
-    # so it's staying as the final solution (modified since dont think many others will come up with that)
-    # (it is also quite interesting that arena came up with that on its own)
-
-    # w63
-    # [3, 7, 2, 8, 1, 9, 5, 5, 2, 8] current champion (why did someone run this before this scenario?)
-    # [0, 0, 0, 1, 1, 1, 1, 1, 1, 1] arena all after I modified mutate function
-
-    # There is absolutely no past precedent and it might as well be impossible to simulate this one
-    # The worth of each tower in soldiers is [2, 4, 6, 8, 10, 12, 14, 16, 18, 20] so allocating
-    # any less than that and winning is strictly beneficial (losing is non-beneficial)
-    # However, if everyone else allocates a lot, then it is optimal to allocate practically nothing
     
-    # (via level-k thinking):
-    # (k=0) Normal strategy as done before
-    # (k=1) Allocating practically nothing is optimal if everyone else allocates a lot
-    # (k=2) We'll allocate at least 1 to everything (except tower 1) to farm the all-0/1 strategies
-    # and then slowly increase from there and see how it goes
-
-    # [0, 1, 2, 2, 3, 3, 3, 4, 6, 6] strategy that I made up
 
     
     if MODE == 1:   
@@ -77,11 +84,15 @@ def main():
         scores = [(s, tournament_score(s, champion_pool)) for s in champion_pool]
         sorted_scores = sorted(scores, key=lambda x: x[1], reverse=True)
 
-        for l in sorted_scores[:10]:
-            print(l)
-        print("[...]")
-        for l in sorted_scores[-10:]:
-            print(l)   
+        if SHOW_ALL_SCORES:
+            for l in sorted_scores:
+                print(l)
+        else:
+            for l in sorted_scores[:10]:
+                print(l)
+            print("[...]")
+            for l in sorted_scores[-10:]:
+                print(l)   
 
 
         write_algos(sorted_scores)
@@ -111,11 +122,15 @@ def main():
         scores = [(s, tournament_score(s, champion_pool)) for s in champion_pool]
         sorted_scores = sorted(scores, key=lambda x: x[1], reverse=True)
 
-        for l in sorted_scores[:10]:
-            print(l)
-        print("[...]")
-        for l in sorted_scores[-10:]:
-            print(l)   
+        if SHOW_ALL_SCORES:
+            for l in sorted_scores:
+                print(l)
+        else:
+            for l in sorted_scores[:10]:
+                print(l)
+            print("[...]")
+            for l in sorted_scores[-10:]:
+                print(l)   
 
         write_algos(sorted_scores)
 
@@ -129,8 +144,15 @@ def main():
         scores = [(s, tournament_score(s, champion_pool)) for s in champion_pool]
         sorted_scores = sorted(scores, key=lambda x: x[1], reverse=True)
     
-        for l in sorted_scores:
-            print(l)
+        if SHOW_ALL_TOURNEY_SCORES:
+            for l in sorted_scores:
+                print(l)
+        else:
+            for l in sorted_scores[:10]:
+                print(l)
+            print("[...]")
+            for l in sorted_scores[-10:]:
+                print(l)   
 
         write_algos(sorted_scores)
 
