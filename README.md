@@ -1,4 +1,4 @@
-# Colonel Blotto — Evolutionary Strategy Optimizer
+# Colonel Blotto Evolutionary Strategy Optimizer
 
 An evolutionary optimization toolkit for the [Colonel Blotto](https://en.wikipedia.org/wiki/Blotto_game) game, built to discover high-performing soldier allocation strategies across a variety of weekly scoring scenarios. This project won first place out of 175 participants in the Waterloo Quant Club's Colonel Blotto Tournament.
 
@@ -6,7 +6,7 @@ An evolutionary optimization toolkit for the [Colonel Blotto](https://en.wikiped
 
 Colonel Blotto is a resource-allocation game. Two players simultaneously distribute **100 soldiers** across **10 towers**. Each tower is worth points equal to its index (Tower 1 = 1 pt, Tower 10 = 10 pts). Whoever allocates more soldiers to a tower wins that tower's points. The player with the higher total score wins.
 
-This project extends the base game with **17 scoring variants** (labeled `w11` through `w73`) from the Waterloo Quant Club's 2026 Colonel Blotto Tournament each introducing a twist — negative-value towers, streak bonuses, parity traps, high-risk thresholds, and more.
+This project extends the base game with **17 scoring variants** (labeled `w11` through `w73`) from the Waterloo Quant Club's 2026 Colonel Blotto Tournament each introducing a twist negative-value towers, win bonuses, multipliers, and more.
 
 There is also an omni-scenario (`omni`) that scores all 17 variants simultaneously, just for fun.
 
@@ -36,7 +36,7 @@ blotto/
 |------|------|-------------|
 | **1** | **Optimize (Co-evolutionary)** | Generates its own metagame. Produces a random seed pool, picks a champion, then iteratively mutates it. Each generation is evaluated against the mutant pool *plus* all historical champions, creating a co-evolving fitness landscape. Best for discovering robust generalist strategies from scratch. Largely became redundant after I discovered that arena mode was better at generating winning strategies. |
 | **2** | **Optimize (Arena)** | Hill-climbs against a fixed opponent pool. Loads existing strategies from `algos/` files into a static arena, then evolves mutations scored strictly against that arena. Best for backtesting off previous human data. |
-| **3** | **Tournament Simulation** | No optimization — loads all specified strategy files and runs a round-robin tournament, ranking every strategy by average score. Useful for evaluating and comparing existing strategies. |
+| **3** | **Tournament Simulation** | No optimization. Loads all specified strategy files and runs a round-robin tournament, ranking every strategy by average score. Useful for evaluating pools or specific strategies. |
 
 ### Evolutionary Loop (Modes 1 & 2)
 
@@ -66,7 +66,7 @@ Each scenario (`w{week}{variant}`) modifies how tower victories translate into p
 
 | Scenario | Rule |
 |----------|------|
-| `w11` | **Baseline** — win a tower, earn its point value |
+| `w11` | **Baseline** - win a tower, earn its point value |
 | `w12` | The *last* (highest-index) tower you win is worth **negative** points |
 | `w21` | The *first* (lowest-index) tower you win is worth **triple** |
 | `w22` | If you win exactly N towers and one of them *is* Tower N, your score **doubles** |
@@ -83,7 +83,7 @@ Each scenario (`w{week}{variant}`) modifies how tower victories translate into p
 | `w71` | Towers with ≥20 soldiers are **high risk**: double if won, negative if lost |
 | `w72` | If you win more even-indexed than odd (or vice versa), the **majority group scores 0** |
 | `w73` | Winning by ≥2× the opponent's allocation makes that tower worth **half** |
-| `omni` | All of `w11`–`w53` scored **simultaneously** |
+| `omni` | All of `w11`–`w73` scored **simultaneously** |
 
 ## Usage
 

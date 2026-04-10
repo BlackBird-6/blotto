@@ -258,4 +258,4 @@ def w73_score(s1, s2):
 
 # All previous scenarios at the same time, combined together.
 def omni_score(s1, s2):
-    return w11_score(s1, s2) + w12_score(s1, s2) + w21_score(s1, s2) + w22_score(s1, s2) + w31_score(s1, s2) + w32_score(s1, s2) + w41_score(s1, s2) + w42_score(s1, s2) + w51_score(s1, s2) + w52_score(s1, s2) + w53_score(s1, s2)
+    return w11_score(s1, s2) + w12_score(s1, s2) + w21_score(s1, s2) + w22_score(s1, s2) + w31_score(s1, s2) + w32_score(s1, s2) + w41_score(s1, s2) + w42_score(s1, s2) + w51_score(s1, s2) + w52_score(s1, s2) + w53_score(s1, s2) + w61_score(s1, s2) + w62_score(s1, s2) + w63_score(s1, s2) + w71_score(s1, s2) + w72_score(s1, s2) + w73_score(s1, s2)
