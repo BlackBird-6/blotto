@@ -1,3 +1,4 @@
+import argparse
 import random
 import numpy as np
 import time
@@ -9,11 +10,10 @@ from sanity_checks import sanity_check
 # useful regex to filter algo text files: ^[^[].+$\n
 champion_pool = []
 SCORE_MODE: str
-MIN_SOLDIERS = 0
+
+MIN_SOLDIERS = 0 # Enforce minimum soldiers per tower
 DONT_ENFORCE_SOLDIER_CAP = False # Only used for w63
 
-all_algos = ["w11", "w12", "w21", "w22", "w31", "w32", "w41", "w42", "w51", "w52", "w53", "w61", "w62", "w63"]
-later_algos = ["w41", "w42", "w51", "w52", "w53", "w61", "w62", "w63"]
 def main():
     global SCORE_MODE
     set_seed(42)
@@ -25,60 +25,37 @@ def main():
     # SHOW_ALL_TOURNEY_SCORES: SHOW_ALL_SCORES (Mode 3)
 
     ############### EDIT THESE ##############    
-    SCORE_MODE = "w11"
-    extend_algos = all_algos + ["extra"]
+    SCORE_MODE = "w73"
+    extend_algos = ["w11", "w21", "secret"]
     MODE = 3
     SHOW_ALL_SCORES = False
     SHOW_ALL_TOURNEY_SCORES = True
     #########################################
 
+    # Parse args
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--SCORE_MODE", type=str)
+    parser.add_argument("--extend_algos", type=str, nargs="*")
+    parser.add_argument("--MODE", type=int, choices=[1, 2, 3])
+    parser.add_argument("--SHOW_ALL_SCORES", action=argparse.BooleanOptionalAction)
 
-    # w71
-    # [1, 2, 3, 2, 2, 2, 26, 27, 33, 2] current champion
-    # [1, 1, 2, 2, 2, 2, 27, 28, 2, 33] arena all
-    # [0, 0, 1, 1, 2, 1, 0, 28, 34, 33] arena on w41 onwards
-    # [1, 1, 1, 2, 3, 2, 2, 3, 43, 42] arena on w62
+    args, _ = parser.parse_known_args()
 
-    # previously arena all has worked pretty well but I am skeptical that the
-    # distribution will probably be irregular and front-focused due to the gimmick
-    # w62 follows essentially exactly what I expect the distribution to be like,
-    # and so I will choose arena on that for my strategy
-
-    # w72
-    # [0, 1, 1, 2, 2, 1, 24, 23, 23, 23] current champion
-    # [2, 2, 9, 0, 0, 21, 26, 1, 2, 37] arena all
-    # [1, 1, 4, 4, 11, 11, 2, 2, 32, 32] strategy I made up
-    
-    # I feel like anything I come up with in arena is going to be overfitted
-    # and wont have any relation to what people will put in the actual tournament
-    # so this will be another time I submit manually
-    # I suspect people will want to pair all of their soldiers, and if everyone
-    # does this, then anyone who does not do this puts themselves
-    # at a disadvantage (because you won't win/lose towers in even pairs and thus lose score)
-    # So, I will also pair my soldiers for essentially 5 tower blotto 
-
-    # w73
-    # [2, 3, 3, 4, 4, 4, 22, 27, 28, 3] current champion (this is also current champion on w11 vs all algos)
-    # [1, 3, 3, 3, 3, 2, 24, 27, 29, 5] arena all (this also wins on w11 rules vs all algos) (seed 402 b/c I forgot to change it back)
-    # [1, 3, 3, 3, 13, 19, 23, 27, 3, 5] arena all (seed 42) (this also wins on w11 vs all algos)
-    # [1, 3, 4, 4, 3, 22, 24, 28, 6, 5] arena all ON W11 RULES (this also wins on w73 vs all algos)
-    # [3, 3, 5, 5, 3, 19, 25, 29, 3, 5] arena on later algos
-
-    # As expected this scenario is practically identical to w11, since you will in
-    # practice never encounter the gimmick if you just play soldiers which are close
-    # to what other people play, which is already what you should be doing anyway
-    # so I will just use arena all and that's a wrap on Colonel Blotto!
+    if args.SCORE_MODE is not None:
+        SCORE_MODE = args.SCORE_MODE
+    if args.extend_algos is not None:
+        extend_algos = args.extend_algos
+    if args.MODE is not None:
+        MODE = args.MODE
+    if args.SHOW_ALL_SCORES is not None:
+        SHOW_ALL_SCORES = args.SHOW_ALL_SCORES
+        SHOW_ALL_TOURNEY_SCORES = args.SHOW_ALL_SCORES
 
     scoring.SCORE_MODE = SCORE_MODE
+
     sanity_check(SCORE_MODE)
     print(f"[Blotto] scenario={SCORE_MODE}  mode={MODE}  extend_algos={extend_algos}")
-    
-    # algos_in = open(f"algos/{scenario}_algos.txt", "r").read().splitlines()
-    
-   
-    
-
-    
+        
     if MODE == 1:   
         champion, champ_score = optimize(k=200, pool_size=100, mutation_strength=30, max_transfer=100)
         scores = [(s, tournament_score(s, champion_pool)) for s in champion_pool]
@@ -94,17 +71,8 @@ def main():
             for l in sorted_scores[-10:]:
                 print(l)   
 
-
         write_algos(sorted_scores)
 
-        # # add the main pool to the champion pool
-        # for a in algos_in:
-        #     champion_pool.append(json.loads(a))
-        # scores = [(s, tournament_score(s, champion_pool)) for s in champion_pool]
-        # sorted_scores = sorted(scores, key=lambda x: x[1], reverse=True)
-        
-        # for l in sorted_scores:
-        #     print(l)
     elif MODE == 2:
 
         for e in extend_algos:
@@ -135,7 +103,7 @@ def main():
         write_algos(sorted_scores)
 
     elif MODE == 3:
-        #add the main pool  
+
         print(f"[Blotto Tournament]  arena_size={len(champion_pool)}")
 
         for e in extend_algos:
@@ -205,16 +173,6 @@ def mutate(strategy: list[int], strength: int = 10, max_transfer: int = 5) -> li
 
     return s
 
-
-def sign(x):
-    if x > 0:
-        return 1
-    elif x < 0:
-        return -1
-    else:
-        return 0
-
-
 # ── Evaluation ────────────────────────────────────────────────────────────────
 
 def tournament_score(strategy: list[int], pool: list[list[int]]) -> float:
@@ -276,10 +234,6 @@ def optimize(k: int = 10, pool_size: int = 1000, mutation_strength: int = 10,
         champion_score = new_score
         champion_pool.append(champion)
 
-
-        # print("Submission score: " + str(tournament_score([2, 4, 6, 9, 11, 17, 24, 22, 2, 3], pool)))
-        # print("Submission score: " + str(tournament_score([3, 1, 2, 6, 14, 23, 24, 17, 10, 0], pool)))
-
     # ── Sanity checks ─────────────────────────────────────────────────────────
     assert all(s >= 0 for s in champion), "Strategy has negative values!"
     assert sum(champion) <= total, f"Strategy uses {sum(champion)} > {total} soldiers!"
@@ -335,9 +289,6 @@ def optimize_arena(k: int = 10, pool_size: int = 1000, mutation_strength: int = 
             print(f"  iter {iteration:>2}         -> champion score = {new_score:.4f}  strategy = {new_champion}")
         champion = new_champion
         champion_score = new_score
-
-        # print("Submission score: " + str(tournament_score([0, 0, 2, 2, 2, 2, 10, 18, 30, 34], pool)))
-        # print("Submission score: " + str(tournament_score([3, 1, 2, 6, 14, 23, 24, 17, 10, 0], pool)))
 
     # ── Sanity checks ─────────────────────────────────────────────────────────
     assert all(s >= 0 for s in champion), "Strategy has negative values!"

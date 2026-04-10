@@ -83,26 +83,33 @@ Each scenario (`w{week}{variant}`) modifies how tower victories translate into p
 | `w71` | Towers with ≥20 soldiers are **high risk**: double if won, negative if lost |
 | `w72` | If you win more even-indexed than odd (or vice versa), the **majority group scores 0** |
 | `w73` | Winning by ≥2× the opponent's allocation makes that tower worth **half** |
-| `omni` | All of `w11`–`w73` scored **simultaneously** |
+| `omni` | All of `w11`–`w73` scored **simultaneously** (very fun) |
 
 ## Usage
 
 ### Running the Optimizer
 
-Edit the configuration block at the top of `main()` in `blotto.py`:
+You can configure the tool by editing the default configuration block at the top of `main()` in `blotto.py`:
 
 ```python
 SCORE_MODE = "w11"                       # Scoring scenario
 extend_algos = all_algos + ["extra"]     # Strategy files to load into the arena
 MODE = 2                                 # 1 = Co-evolutionary, 2 = Arena, 3 = Tournament
-SHOW_ALL_SCORES = False                  # Print full or truncated leaderboard
+SHOW_ALL_SCORES = False                  # Print full or truncated leaderboard (when MODE=1 or 2)
+SHOW_ALL_TOURNEY_SCORES = False          # Print full or truncated leaderboard (when MODE=3)
 ```
 
-Then run:
+Alternatively, you can override these defaults dynamically via CLI arguments without modifying the file.
 
 ```bash
-python blotto.py
+python blotto.py --SCORE_MODE w41 --extend_algos w11 w12 extra --MODE 3 --SHOW_ALL_SCORES
 ```
+
+**Available CLI Arguments:**
+- `--SCORE_MODE <scenario>`: Override the scoring scenario (e.g., `w71`).
+- `--extend_algos <list>`: Override the imported strategy files (space-separated, e.g., `w11 w12 extra`).
+- `--MODE <int>`: Override the execution mode (`1`, `2`, or `3`).
+- `--SHOW_ALL_SCORES`: Prints the full leaderboard (`--no-SHOW_ALL_SCORES` to truncate).
 
 Results are written to `algos/out_algos.txt`, ranked best-to-worst.
 
