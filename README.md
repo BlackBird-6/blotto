@@ -1,14 +1,14 @@
 # Colonel Blotto Evolutionary Strategy Optimizer
 
-An evolutionary optimization toolkit for the [Colonel Blotto](https://en.wikipedia.org/wiki/Blotto_game) game, built to discover high-performing soldier allocation strategies across a variety of weekly scoring scenarios. This project won first place out of 175 participants in the Waterloo Quant Club's Colonel Blotto Tournament.
+An evolutionary optimization toolkit for the [Colonel Blotto](https://en.wikipedia.org/wiki/Blotto_game) game, built to discover high-performing soldier allocation strategies across a variety of weekly scoring scenarios. This toolkit helped me win first place out of 175 participants in the Waterloo Quant Club's Colonel Blotto Tournament.
 
 ## The Game
 
 Colonel Blotto is a resource-allocation game. Two players simultaneously distribute **100 soldiers** across **10 towers**. Each tower is worth points equal to its index (Tower 1 = 1 pt, Tower 10 = 10 pts). Whoever allocates more soldiers to a tower wins that tower's points. The player with the higher total score wins.
 
-This project extends the base game with **17 scoring variants** (labeled `w11` through `w73`) from the Waterloo Quant Club's 2026 Colonel Blotto Tournament each introducing a twist negative-value towers, win bonuses, multipliers, and more.
+This project extends the base game with **16 scoring variants** (labeled `w12` through `w73`) from the Waterloo Quant Club's 2026 Colonel Blotto Tournament each introducing a twist negative-value towers, win bonuses, multipliers, and more.
 
-There is also an omni-scenario (`omni`) that scores all 17 variants simultaneously, just for fun.
+There is also an omni-scenario (`omni`) that scores all base + 16 variants simultaneously, just for fun.
 
 ## Project Structure
 
@@ -99,7 +99,7 @@ SHOW_ALL_SCORES = False                  # Print full or truncated leaderboard (
 SHOW_ALL_TOURNEY_SCORES = False          # Print full or truncated leaderboard (when MODE=3)
 ```
 
-Alternatively, you can override these defaults dynamically via CLI arguments without modifying the file.
+Alternatively, you can also override these defaults dynamically via CLI arguments, without modifying the file.
 
 ```bash
 python blotto.py --SCORE_MODE w41 --extend_algos w11 w12 extra --MODE 3 --SHOW_ALL_SCORES
@@ -122,7 +122,7 @@ python avg_interactive.py                    # loads out_algos.txt
 python avg_interactive.py algos/w42_algos.txt  # loads a specific file
 ```
 
-**Controls:** ◀/▶ buttons or arrow keys to step, slider to scrub. Shows each strategy's allocation as a bar chart alongside the cumulative average of all higher-ranked strategies.
+**Controls:** Use the clickable left/right buttons or arrow keys to step, or use the slider to scrub. Each graph shows the current strategy's allocation alongside the cumulative average of all higher-ranked strategies.
 
 ## Requirements
 
