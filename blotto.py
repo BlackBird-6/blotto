@@ -13,7 +13,8 @@ SCORE_MODE: str
 
 MIN_SOLDIERS = 0 # Enforce minimum soldiers per tower
 DONT_ENFORCE_SOLDIER_CAP = False # Only used for w63
-
+all_algos = ["wo11", "wo12", "wo21", "wo22", "wo31", "wo32", "wo41", "wo42", "wo51", "wo52", "wo53", "wo61", "wo62", "wo63", "wo71", "wo72", "wo73"]
+later_algos = ["wo41", "wo42", "wo51", "wo52", "wo53", "wo61", "wo62", "wo63", "wo71", "wo72", "wo73"]
 def main():
     global SCORE_MODE
     set_seed(42)
@@ -25,9 +26,9 @@ def main():
     # SHOW_ALL_TOURNEY_SCORES: SHOW_ALL_SCORES (Mode 3)
 
     ############### EDIT THESE ##############    
-    SCORE_MODE = "w73"
-    extend_algos = ["w11", "w21", "secret"]
-    MODE = 3
+    SCORE_MODE = "w12"
+    extend_algos = all_algos
+    MODE = 2
     SHOW_ALL_SCORES = False
     SHOW_ALL_TOURNEY_SCORES = True
     #########################################

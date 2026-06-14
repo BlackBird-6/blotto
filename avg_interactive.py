@@ -5,7 +5,7 @@ Browse ranked strategies from an algo file (default: out_algos.txt).
 
 Usage:
     python avg_interactive.py                  # loads out_algos.txt
-    python avg_interactive.py w42_algos.txt    # loads a different file
+    python avg_interactive.py wo42_algos.txt    # loads a different file
 
 Controls:
     ◀ / ▶ buttons   — step through strategies
