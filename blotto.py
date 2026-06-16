@@ -21,14 +21,14 @@ def main():
 
     # SCORE_MODE: Algorithm to use for scoring (e.g. w71 for week 7 scenario 1)
     # extend_algos: Algorithms to add to the pool as a list of strings (e.g. ["w11", "w12"])
-    # MODE: 1 -- Optimize, 2 -- Optimize (Arena), 3 -- Tournament Simulation
+    # MODE: 1 -- Optimize, 2 -- Optimize (Arena), 3 -- Tournament Simulation, 4 -- Arena Verbose
     # SHOW_ALL_SCORES: Whether to show all scores or just the top and bottom 10 (Modes 1/2)
-    # SHOW_ALL_TOURNEY_SCORES: SHOW_ALL_SCORES (Mode 3)
+    # SHOW_ALL_TOURNEY_SCORES: SHOW_ALL_SCORES (Modes 3/4)
 
     ############### EDIT THESE ##############    
-    SCORE_MODE = "w12"
-    extend_algos = all_algos
-    MODE = 2
+    SCORE_MODE = "w21"
+    extend_algos = ["w11"]
+    MODE = 3
     SHOW_ALL_SCORES = False
     SHOW_ALL_TOURNEY_SCORES = True
     #########################################
@@ -37,7 +37,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--SCORE_MODE", type=str)
     parser.add_argument("--extend_algos", type=str, nargs="*")
-    parser.add_argument("--MODE", type=int, choices=[1, 2, 3])
+    parser.add_argument("--MODE", type=int, choices=[1, 2, 3, 4])
     parser.add_argument("--SHOW_ALL_SCORES", action=argparse.BooleanOptionalAction)
 
     args, _ = parser.parse_known_args()
@@ -103,14 +103,17 @@ def main():
 
         write_algos(sorted_scores)
 
-    elif MODE == 3:
-
-        print(f"[Blotto Tournament]  arena_size={len(champion_pool)}")
+    elif MODE == 3 or MODE == 4:
+        verbose = (MODE == 4)
+        if verbose:
+            print(f"[Blotto Tournament Verbose]  arena_size={len(champion_pool)}")
+        else:
+            print(f"[Blotto Tournament]  arena_size={len(champion_pool)}")
 
         for e in extend_algos:
             champion_pool.extend([json.loads(a) for a in open(f"algos/{e}_algos.txt", "r").read().splitlines()])
 
-        scores = [(s, tournament_score(s, champion_pool)) for s in champion_pool]
+        scores = arena(champion_pool, verbose=verbose)
         sorted_scores = sorted(scores, key=lambda x: x[1], reverse=True)
     
         if SHOW_ALL_TOURNEY_SCORES:
@@ -179,6 +182,49 @@ def mutate(strategy: list[int], strength: int = 10, max_transfer: int = 5) -> li
 def tournament_score(strategy: list[int], pool: list[list[int]]) -> float:
     """Average score of `strategy` against every opponent in `pool`."""
     return sum(score(strategy, opponent) for opponent in pool)/(len(pool)-1)
+
+
+def arena(pool: list[list[int]], verbose: bool = False) -> list[tuple[list[int], float]]:
+    """
+    Run a tournament/arena simulation for all strategies in the pool.
+    Returns a list of tuples (strategy, tournament_score) computed in a single pass.
+    If verbose is True, prints every matchup grouped by strategy in consistent order.
+    """
+    n = len(pool)
+    if n <= 1:
+        return [(s, 0.0) for s in pool]
+
+    accumulated_scores = [0.0] * n
+    
+    # Pre-calculate self-matchups
+    for i in range(n):
+        accumulated_scores[i] += score(pool[i], pool[i])
+
+    for i in range(n):
+        for j in range(i + 1, n):
+            s1, s2 = pool[i], pool[j]
+            res_12 = score(s1, s2)
+            res_21 = score(s2, s1)
+            
+            accumulated_scores[i] += res_12
+            accumulated_scores[j] += res_21
+                    
+    denominator = n - 1
+    results = [(pool[i], accumulated_scores[i] / denominator) for i in range(n)]
+
+    if verbose:
+        strat_width = max(len(str(s)) for s in pool)
+        for i in range(n):
+            for j in range(n):
+                if i == j:
+                    continue
+                s1, s2 = pool[i], pool[j]
+                res_a = score(s1, s2)
+                res_b = score(s2, s1)
+                wld = 'W' if res_a > res_b else ('L' if res_a < res_b else 'D')
+                print(f"{str(s1):<{strat_width}} vs {str(s2):<{strat_width}}: {res_a:>6} - {res_b:<6} {wld}")
+            print("")
+    return results
 
 
 # ── Main optimizer ────────────────────────────────────────────────────────────

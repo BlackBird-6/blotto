@@ -12,6 +12,30 @@ def sanity_check(scenario):
         assert score([0, 1, 1, 1, 1, 1, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 44
         assert score([1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 143
 
+    # w21: towers won by at most 5 more soldiers are worth double
+    if scenario == "w21":
+       # All towers won by 1 (≤5), so all doubled: 2*55 = 110
+       assert score([1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 110
+       # Tower 1 won by 5 (≤5) → doubled: 2*1 = 2
+       assert score([5, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 2
+       # Tower 1 won by 6 (>5) → not doubled: 1
+       assert score([6, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 1
+       # Tower 1 won by 6 (not doubled)=1, tower 2 won by 1 (doubled)=4. Total=5
+       assert score([6, 2, 0, 0, 0, 0, 0, 0, 0, 0], [0, 1, 0, 0, 0, 0, 0, 0, 0, 0]) == 5
+
+    # w22: if a player wins strictly fewer towers, they receive 2n extra points (n = opponent's tower wins)
+    if scenario == "w22":
+       # s1 wins 1 tower, s2 wins 2 → fewer, bonus = 2*2 = 4. Base = 1. Total = 5
+       assert score([1, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 1, 1, 0, 0, 0, 0, 0, 0, 0]) == 1 + 2*2
+       # s1 wins 2, s2 wins 2 → not strictly fewer, no bonus. Total = 1+2 = 3
+       assert score([1, 1, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 1, 1, 0, 0, 0, 0, 0, 0]) == 3
+       # s1 wins 3, s2 wins 1 → more, no bonus. Total = 1+2+3 = 6
+       assert score([1, 1, 1, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]) == 6
+       # s1 wins 0, s2 wins 5 → fewer, bonus = 2*5 = 10. Base = 0. Total = 10
+       assert score([0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [1, 1, 1, 1, 1, 0, 0, 0, 0, 0]) == 10
+       # s1 wins 1 tower (tower 10, worth 10), s2 wins 9 → bonus = 2*9 = 18. Total = 28
+       assert score([0, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 0]) == 10 + 2*9
+
     if scenario == "wo11":
         assert score([1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 55
         assert score([1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]) == 0

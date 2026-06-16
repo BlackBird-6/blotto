@@ -9,6 +9,10 @@ def score(s1, s2):
     SCORE_FUNCTIONS = {
     "w11": w11_score,
     "w12": w12_score,
+    "w21": w21_score,
+    "w22": w22_score,
+    # "w31": w31_score,
+    # "w32": w32_score,
     "wo11": wo11_score,
     "wo12": wo12_score,
     "wo21": wo21_score,
@@ -279,6 +283,26 @@ def w12_score(s1, s2):
             else:
                 s1_score += tower_pts[i]
     return s1_score
+
+def w21_score(s1, s2):
+    score = 0
+    for i in range(10):
+        if s1[i] > s2[i]:
+            score += tower_pts[i]
+            if s1[i] <= s2[i]+5:
+                score += tower_pts[i]
+    return score
+
+def w22_score(s1, s2):
+    s1_wins = [s1[i] > s2[i] for i in range(10)]
+    s2_wins = [s1[i] < s2[i] for i in range(10)]
+    score = 0
+    for i in range(10):
+        if s1[i] > s2[i]:
+            score += tower_pts[i]
+    if sum(s2_wins) > sum(s1_wins):
+       score += 2 * sum(s2_wins)
+    return score
 
 # All previous scenarios at the same time, combined together!!!
 def omni_score(s1, s2):
