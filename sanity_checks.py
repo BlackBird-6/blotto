@@ -36,6 +36,26 @@ def sanity_check(scenario):
        # s1 wins 1 tower (tower 10, worth 10), s2 wins 9 → bonus = 2*9 = 18. Total = 28
        assert score([0, 0, 0, 0, 0, 0, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 0]) == 10 + 2*9
 
+    # w31: towers won by 15 or more are worthless
+    if scenario == "w31":
+        # s1 allocates 14 on tower 1 (win by 14) -> gets 1 pt
+        assert score([14, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 1
+        # s1 allocates 15 on tower 1 (win by 15) -> gets 0 pts
+        assert score([15, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 0
+        # s1 allocates 16 on tower 1 (win by 16) -> gets 0 pts
+        assert score([16, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 0
+        # s1 allocates 10 on tower 1 (win by 9), 14 on tower 2 (win by 14) -> gets 1+2 = 3 pts
+        assert score([10, 14, 0, 0, 0, 0, 0, 0, 0, 0], [1, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 3
+
+    # w32: if both players allocate at least 15 soldiers to a tower, then that tower is worth half the amount of points
+    if scenario == "w32":
+        # both >= 15: s1 allocates 16, s2 allocates 15 on tower 1 -> win, worth 1/2 = 0.5 pts
+        assert score([16, 0, 0, 0, 0, 0, 0, 0, 0, 0], [15, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 0.5
+        # s1 >= 15 but s2 < 15: s1 allocates 16, s2 allocates 14 on tower 1 -> win, worth 1 pt
+        assert score([16, 0, 0, 0, 0, 0, 0, 0, 0, 0], [14, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 1.0
+        # both < 15: s1 allocates 14, s2 allocates 10 on tower 1 -> win, worth 1 pt
+        assert score([14, 0, 0, 0, 0, 0, 0, 0, 0, 0], [10, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 1.0
+
     if scenario == "wo11":
         assert score([1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 55
         assert score([1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]) == 0

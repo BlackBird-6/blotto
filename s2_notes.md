@@ -15,6 +15,7 @@ Following are a bunch of notes that I took over the course of the tournament, so
 ## w21:
     [2, 4, 5, 5, 4, 18, 25, 4, 28, 5] arena
     [0, 0, 6, 6, 6, 6, 6, 31, 31, 8] manual
+    [4, 5, 6, 6, 6, 6, 27, 28, 6, 6] arena (top cut) [6th]
 
     hypotheses: people will put 5 a lot to capture 0s
     people will play a number around 4 in their unused 8/9/10
@@ -23,7 +24,7 @@ Following are a bunch of notes that I took over the course of the tournament, so
 
 ## w22:
     [0, 0, 0, 1, 3, 2, 2, 28, 35, 29] arena
-    [1, 2, 3, 4, 8, 3, 3, 1, 37, 38] arena (top cut)
+    [1, 2, 3, 4, 8, 3, 3, 1, 37, 38] arena (top cut, pool=200) [wins actually]
     [0, 1, 1, 2, 2, 2, 2, 0, 51, 39] manual
 
     hypotheses:

@@ -13,7 +13,7 @@ SCORE_MODE: str
 
 MIN_SOLDIERS = 0 # Enforce minimum soldiers per tower
 DONT_ENFORCE_SOLDIER_CAP = False # Only used for w63
-all_algos = ["wo11", "wo12", "wo21", "wo22", "wo31", "wo32", "wo41", "wo42", "wo51", "wo52", "wo53", "wo61", "wo62", "wo63", "wo71", "wo72", "wo73"]
+all_algos = ["wo11", "wo12", "wo21", "wo22", "wo31", "wo32", "wo41", "wo42", "wo51", "wo52", "wo53", "wo61", "wo62", "wo63", "wo71", "wo72", "wo73", "w11", "w12", "w21", "w22"]
 later_algos = ["wo41", "wo42", "wo51", "wo52", "wo53", "wo61", "wo62", "wo63", "wo71", "wo72", "wo73"]
 def main():
     global SCORE_MODE
@@ -25,10 +25,17 @@ def main():
     # SHOW_ALL_SCORES: Whether to show all scores or just the top and bottom 10 (Modes 1/2)
     # SHOW_ALL_TOURNEY_SCORES: SHOW_ALL_SCORES (Modes 3/4)
 
+    # [2, 4, 7, 14, 14, 14, 14, 4, 14, 13] arena
+    # [0, 4, 7, 12, 15, 19, 0, 14, 15, 14] arena topcut
+    # [2, 3, 3, 3, 8, 16, 16, 16, 16, 17] manual
+
+    # [2, 4, 6, 11, 15, 16, 22, 4, 7, 13] arena
+    # [0, 4, 7, 12, 15, 15, 0, 16, 16, 15] arena topcut
+
     ############### EDIT THESE ##############    
-    SCORE_MODE = "w21"
-    extend_algos = ["w11"]
-    MODE = 3
+    SCORE_MODE = "w32"
+    extend_algos = ["topcut"]
+    MODE = 2
     SHOW_ALL_SCORES = False
     SHOW_ALL_TOURNEY_SCORES = True
     #########################################
@@ -130,9 +137,14 @@ def main():
 
 def write_algos(sorted_scores):
     algos_out = open("algos/out_algos.txt", "w")
-    for l in sorted_scores:
+    topcut_out = open("algos/out_algos.txt", "w")
+
+    for i, l in enumerate(sorted_scores):
         algos_out.write(str(l[0]) + "\n")
+        if(i < 200):
+            topcut_out.write(str(l[0]) + "\n")
     algos_out.close()
+    topcut_out.close()
  
 
 def set_seed(seed: int = 42) -> None:

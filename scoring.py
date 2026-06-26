@@ -11,8 +11,8 @@ def score(s1, s2):
     "w12": w12_score,
     "w21": w21_score,
     "w22": w22_score,
-    # "w31": w31_score,
-    # "w32": w32_score,
+    "w31": w31_score,
+    "w32": w32_score,
     "wo11": wo11_score,
     "wo12": wo12_score,
     "wo21": wo21_score,
@@ -303,6 +303,26 @@ def w22_score(s1, s2):
     if sum(s2_wins) > sum(s1_wins):
        score += 2 * sum(s2_wins)
     return score
+
+# Towers won by 15 or more are worthless
+def w31_score(s1, s2):
+    score = 0
+    for i in range(10):
+        if s1[i] > s2[i] and s1[i] - s2[i] < 15:
+            score += tower_pts[i]
+    return score
+
+# if both players allocate at least 15 soldiers to a tower, then that tower is worth half the amount of points.
+def w32_score(s1, s2):
+    score = 0
+    for i in range(10):
+        if s1[i] > s2[i]:
+            if s1[i] >= 15 and s2[i] >= 15:
+                score += tower_pts[i]/2
+            else:
+                score += tower_pts[i]
+    return score
+   
 
 # All previous scenarios at the same time, combined together!!!
 def omni_score(s1, s2):
