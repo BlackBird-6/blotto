@@ -6,9 +6,9 @@ An evolutionary optimization toolkit for the [Colonel Blotto](https://en.wikiped
 
 Colonel Blotto is a resource-allocation game. Two players simultaneously distribute **100 soldiers** across **10 towers**. Each tower is worth points equal to its index (Tower 1 = 1 pt, Tower 10 = 10 pts). Whoever allocates more soldiers to a tower wins that tower's points. The player with the higher total score wins.
 
-This project extends the base game with **16 scoring variants** (labeled `w12` through `w73`) from the Waterloo Quant Club's 2026 Colonel Blotto Tournament each introducing a twist negative-value towers, win bonuses, multipliers, and more.
+This project extends the base game with numerous scoring variants from the Waterloo Quant Club's Colonel Blotto Tournament, including Season 1 (`wo11` through `wo73`) and Season 2 (`w11` through `w62`), each introducing a twist: negative-value towers, win bonuses, multipliers, and more.
 
-There is also an omni-scenario (`omni`) that scores all base + 16 variants simultaneously, just for fun.
+There is also an omni-scenario (`omni`) that scores multiple variants simultaneously, just for fun.
 
 ## Project Structure
 
@@ -60,30 +60,45 @@ blotto/
 | `mutation_strength` | 30 | Max random soldier-transfer moves per mutation |
 | `max_transfer` | 100 | Max soldiers moved in a single transfer |
 
-## Scoring Scenarios
+Each scenario modifies how tower victories translate into points:
 
-Each scenario (`w{week}{variant}`) modifies how tower victories translate into points:
-
+### Season 2 Scenarios (`w*`)
 | Scenario | Rule |
 |----------|------|
 | `w11` | **Baseline** - win a tower, earn its point value |
-| `w12` | The *last* (highest-index) tower you win is worth **negative** points |
-| `w21` | The *first* (lowest-index) tower you win is worth **triple** |
-| `w22` | If you win exactly N towers and one of them *is* Tower N, your score **doubles** |
-| `w31` | First tower in each consecutive winning **streak** is worth **double** |
-| `w32` | An **isolated** win (no adjacent towers won) is worth **negative** |
-| `w41` | If your highest-index win beats the opponent's, each tower is worth **1 less** |
-| `w42` | The tower you won by the **largest margin** is worth **double** |
-| `w51` | If you win strictly **more towers** than the opponent, each is worth **1 less** |
-| `w52` | The won tower where you allocated the **most soldiers** is worth **0** |
-| `w53` | The *first* tower you win with **>10 soldiers** is worth **0** |
-| `w61` | Consecutive wins earn an **arithmetic bonus** (+0, +3, +6, …) |
-| `w62` | Winning both Tower *i* and Tower *11−i* makes **both worth 0** |
-| `w63` | Each **unused soldier** earns **0.5 points** |
-| `w71` | Towers with ≥20 soldiers are **high risk**: double if won, negative if lost |
-| `w72` | If you win more even-indexed than odd (or vice versa), the **majority group scores 0** |
-| `w73` | Winning by ≥2× the opponent's allocation makes that tower worth **half** |
-| `omni` | All of `w11`–`w73` scored **simultaneously** (very fun) |
+| `w12` | If a won tower is sandwiched between two won towers, it is worth **triple** |
+| `w21` | Towers won by at most 5 more soldiers are worth **double** |
+| `w22` | If a player wins strictly fewer towers, they receive **2n extra points** (n = opponent's tower wins) |
+| `w31` | Towers won by 15 or more soldiers are **worthless (0 points)** |
+| `w32` | If both players allocate at least 15 soldiers to a tower, it is worth **half** |
+| `w41` | All towers from 1 to 5, inclusive, are worth **double** |
+| `w42` | If all towers won form exactly one consecutive run, the last tower of the run is worth **double** |
+| `w51` | If you win exactly 2 or 3 towers, your points are **doubled** |
+| `w52` | If you win the same number of towers among Towers 1-5 as Towers 6-10, each won tower is worth **+2 points** |
+| `w61` | You win a tower iff you place **at least 10 more** soldiers there than the opponent |
+| `w62` | Exact same as `wo63` and reroutes to it (each unused soldier earns **0.5 points**) |
+
+### Season 1 Scenarios (`wo*`)
+| Scenario | Rule |
+|----------|------|
+| `wo11` | **Baseline** - win a tower, earn its point value |
+| `wo12` | The *last* (highest-index) tower you win is worth **negative** points |
+| `wo21` | The *first* (lowest-index) tower you win is worth **triple** |
+| `wo22` | If you win exactly N towers and one of them *is* Tower N, your score **doubles** |
+| `wo31` | First tower in each consecutive winning **streak** is worth **double** |
+| `wo32` | An **isolated** win (no adjacent towers won) is worth **negative** |
+| `wo41` | If your highest-index win beats the opponent's, each tower is worth **1 less** |
+| `wo42` | The tower you won by the **largest margin** is worth **double** |
+| `wo51` | If you win strictly **more towers** than the opponent, each is worth **1 less** |
+| `wo52` | The won tower where you allocated the **most soldiers** is worth **0** |
+| `wo53` | The *first* tower you win with **>10 soldiers** is worth **0** |
+| `wo61` | Consecutive wins earn an **arithmetic bonus** (+0, +3, +6, …) |
+| `wo62` | Winning both Tower *i* and Tower *11−i* makes **both worth 0** |
+| `wo63` | Each **unused soldier** earns **0.5 points** |
+| `wo71` | Towers with ≥20 soldiers are **high risk**: double if won, negative if lost |
+| `wo72` | If you win more even-indexed than odd (or vice versa), the **majority group scores 0** |
+| `wo73` | Winning by ≥2× the opponent's allocation makes that tower worth **half** |
+| `omni` | All variants scored **simultaneously** (very fun) |
 
 ## Usage
 

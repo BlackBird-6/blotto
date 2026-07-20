@@ -32,8 +32,39 @@ def main():
     # [2, 4, 6, 11, 15, 16, 22, 4, 7, 13] arena
     # [0, 4, 7, 12, 15, 15, 0, 16, 16, 15] arena topcut
 
+
+    # [3, 5, 8, 16, 19, 3, 4, 28, 7, 7] arena
+
+    # [0, 0, 2, 4, 12, 21, 27, 28, 3, 3] arena
+
+    # [0, 0, 0, 0, 0, 0, 30, 35, 35, 0]
+
+    # w5
+    # [0, 0, 0, 0, 0, 0, 0, 31, 35, 34] arena
+    # [0, 0, 0, 0, 1, 0, 0, 43, 0, 56] manual
+    
+    # [0, 0, 11, 13, 3, 3, 26, 3, 36, 5]
+
+    # w61
+    # [0, 0, 0, 0, 0, 0, 0, 37, 42, 21] norm
+    # [0, 0, 11, 12, 12, 12, 12, 41, 0, 0] topcut
+
+    # [0, 0, 0, 22, 22, 12, 23, 10, 11, 0] off topcut
+    # [0, 0, 0, 11, 12, 22, 11, 0, 0, 44]
+    # [0, 0, 0, 22, 22, 12, 24, 10, 10, 0]
+    # [0, 10, 13, 10, 10, 12, 23, 0, 10, 12]
+    # [0, 0, 11, 12, 12, 12, 12, 41, 0, 0]
+    # [0, 0, 0, 0, 0, 0, 0, 33, 34, 33]
+    # [0, 0, 0, 0, 0, 0, 0, 33, 34, 33]
+    # [0, 0, 0, 0, 0, 0, 0, 33, 34, 33]
+    # [1, 1, 1, 1, 1, 1, 1, 30, 42, 21]
+
+    # w62
+
+
+
     ############### EDIT THESE ##############    
-    SCORE_MODE = "w32"
+    SCORE_MODE = "w61"
     extend_algos = ["topcut"]
     MODE = 2
     SHOW_ALL_SCORES = False
@@ -137,7 +168,7 @@ def main():
 
 def write_algos(sorted_scores):
     algos_out = open("algos/out_algos.txt", "w")
-    topcut_out = open("algos/out_algos.txt", "w")
+    topcut_out = open("algos/topcut_algos.txt", "w")
 
     for i, l in enumerate(sorted_scores):
         algos_out.write(str(l[0]) + "\n")

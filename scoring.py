@@ -13,6 +13,12 @@ def score(s1, s2):
     "w22": w22_score,
     "w31": w31_score,
     "w32": w32_score,
+    "w41": w41_score,
+    "w42": w42_score,
+    "w51": w51_score,
+    "w52": w52_score,
+    "w61": w61_score,
+    "w62": w62_score,
     "wo11": wo11_score,
     "wo12": wo12_score,
     "wo21": wo21_score,
@@ -322,7 +328,67 @@ def w32_score(s1, s2):
             else:
                 score += tower_pts[i]
     return score
-   
+
+
+# all towers from 1 to 5, inclusive, are worth double.
+def w41_score(s1, s2):
+    score = 0
+    for i in range(10):
+        if s1[i] > s2[i]:
+            if i < 5:
+                score += tower_pts[i] * 2
+            else:
+                score += tower_pts[i]
+    return score
+
+# for a player, if all the towers won form exactly one consecutive run,
+# then the last tower of the run is worth double.
+def w42_score(s1, s2):
+    won_indices = [i for i in range(10) if s1[i] > s2[i]]
+    if not won_indices:
+        return 0
+    
+    score = sum(tower_pts[i] for i in won_indices)
+    
+    # Check if all won towers form exactly one consecutive run
+    if len(won_indices) == won_indices[-1] - won_indices[0] + 1:
+        score += tower_pts[won_indices[-1]]
+        
+    return score
+
+
+# Scenario 1: if a player wins exactly 2 or exactly 3 towers, then their points are doubled.
+def w51_score(s1, s2):
+    won = [i for i in range(10) if s1[i] > s2[i]]
+    base_score = sum(tower_pts[i] for i in won)
+    if len(won) in (2, 3):
+        return base_score * 2
+    return base_score
+
+# Scenario 2: if a player wins the same number of towers among Tower 1 to 5 as among Tower 6 to 10,
+# then each tower won is worth +2 points.
+def w52_score(s1, s2):
+    won = [i for i in range(10) if s1[i] > s2[i]]
+    base_score = sum(tower_pts[i] for i in won)
+    first_half = sum(1 for i in won if i < 5)
+    second_half = sum(1 for i in won if i >= 5)
+    if first_half == second_half:
+        return base_score + 2 * len(won)
+    return base_score
+
+
+# A player wins a tower iff they place at least 10 more soldiers there than the opponent.
+def w61_score(s1, s2):
+    score = 0
+    for i in range(10):
+        if s1[i] >= s2[i] + 10:
+            score += tower_pts[i]
+    return score
+
+# Exact same as wo63 and reroutes to it
+def w62_score(s1, s2):
+    return wo63_score(s1, s2)
+
 
 # All previous scenarios at the same time, combined together!!!
 def omni_score(s1, s2):

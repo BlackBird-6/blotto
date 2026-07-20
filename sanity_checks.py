@@ -56,6 +56,51 @@ def sanity_check(scenario):
         # both < 15: s1 allocates 14, s2 allocates 10 on tower 1 -> win, worth 1 pt
         assert score([14, 0, 0, 0, 0, 0, 0, 0, 0, 0], [10, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 1.0
 
+    # w41: all towers from 1 to 5, inclusive, are worth double
+    if scenario == "w41":
+        # Winning all towers: 2*1 + 2*2 + 2*3 + 2*4 + 2*5 + 6 + 7 + 8 + 9 + 10 = 70
+        assert score([1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 70
+        # Winning only towers 1-5 (indices 0-4): 2*1 + 2*2 + 2*3 + 2*4 + 2*5 = 30
+        assert score([1, 1, 1, 1, 1, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 30
+        # Winning only towers 6-10 (indices 5-9): 6 + 7 + 8 + 9 + 10 = 40
+        assert score([0, 0, 0, 0, 0, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 40
+
+    # w42: for a player, if all the towers won form exactly one consecutive run, the last tower is worth double
+    if scenario == "w42":
+        # Winning only Tower 5 (index 4) (single tower run): 5*2 = 10
+        assert score([0, 0, 0, 0, 1, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 10
+        # Winning Towers 1, 2, 3, 4 (indices 0, 1, 2, 3) (consecutive run): last is Tower 4 (worth 4). 1 + 2 + 3 + (4*2) = 14
+        assert score([1, 1, 1, 1, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 14
+        # Winning Towers 1 and 3 (indices 0 and 2) (non-consecutive): no doubling. 1 + 3 = 4
+        assert score([1, 0, 1, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 4
+        # Winning no towers: 0
+        assert score([0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 0
+        # Winning all 10 towers (consecutive run): last is Tower 10 (worth 10). 45 + (10*2) = 65
+        assert score([1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 65
+
+    # w51: if a player wins exactly 2 or exactly 3 towers, then their points are doubled
+    if scenario == "w51":
+        # Win 1 tower (Tower 1): not doubled. Points = 1
+        assert score([1, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 1
+        # Win 2 towers (Tower 1 and 2): doubled. (1+2)*2 = 6
+        assert score([1, 1, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 6
+        # Win 3 towers (Tower 1, 2, 3): doubled. (1+2+3)*2 = 12
+        assert score([1, 1, 1, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 12
+        # Win 4 towers (Tower 1, 2, 3, 4): not doubled. 1+2+3+4 = 10
+        assert score([1, 1, 1, 1, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 10
+        
+    # w52: if a player wins the same number of towers among Tower 1 to 5 as among Tower 6 to 10,
+    # then each tower won is worth +2 points.
+    if scenario == "w52":
+        # Win Tower 1 (index 0) and Tower 6 (index 5) (counts: 1 and 1). Equal -> +2 to each. (1+2) + (6+2) = 11
+        assert score([1, 0, 0, 0, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 11
+        # Win Tower 1, 2 (index 0, 1) and Tower 6 (index 5) (counts: 2 and 1). Not equal -> no bonus. 1 + 2 + 6 = 9
+        assert score([1, 1, 0, 0, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 9
+        # Win no towers (counts: 0 and 0). Equal -> each gets +2, but 0 towers won. Total = 0
+        assert score([0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 0
+        # Win all 10 towers (counts: 5 and 5). Equal -> +2 to each. 55 + (2*10) = 75
+        assert score([1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 75
+
     if scenario == "wo11":
         assert score([1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 55
         assert score([1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]) == 0
@@ -132,5 +177,17 @@ def sanity_check(scenario):
        assert score([1, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 0.5
        assert score([1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 27.5
        assert score([2, 4, 6, 8, 10, 11, 13, 15, 17, 19], [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) == 0.5+1+1.5+2+2.5+6+7+8+9+10
+
+    if scenario == "w61":
+       # At least 10 more than the opponent to win a tower.
+       assert score([10, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 1
+       assert score([9, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 0
+       assert score([19, 10, 0, 0, 0, 0, 0, 0, 0, 0], [10, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 2
+
+    if scenario == "w62":
+       # Same as wo63
+       assert score([0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 50
+       assert score([0, 0, 0, 0, 0, 0, 0, 0, 0, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 59.5
+       assert score([0, 0, 0, 0, 0, 0, 0, 0, 0, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0, 1]) == 49.5
 
     # There is no sanity check for omni-score scenario because it is not sane.
