@@ -19,6 +19,9 @@ def score(s1, s2):
     "w52": w52_score,
     "w61": w61_score,
     "w62": w62_score,
+    "w71": w71_score,
+    "w72": w72_score,
+    "w73": w73_score,
     "wo11": wo11_score,
     "wo12": wo12_score,
     "wo21": wo21_score,
@@ -388,6 +391,37 @@ def w61_score(s1, s2):
 # Exact same as wo63 and reroutes to it
 def w62_score(s1, s2):
     return wo63_score(s1, s2)
+
+
+# Scenario 1: For both players, any tower won with exactly 20 soldiers is worth double.
+def w71_score(s1, s2):
+    score = 0
+    for i in range(10):
+        if s1[i] > s2[i]:
+            if s1[i] == 20:
+                score += tower_pts[i] * 2
+            else:
+                score += tower_pts[i]
+    return score
+
+# Scenario 2: For each player, the highest-indexed tower they won is worth 0.
+def w72_score(s1, s2):
+    won = [i for i in range(10) if s1[i] > s2[i]]
+    if not won:
+        return 0
+    return sum(tower_pts[i] for i in won[:-1])
+
+# Scenario 3: For each player, the tower they win by the smallest positive margin is worth double. Ties are broken by the highest-indexed tower.
+def w73_score(s1, s2):
+    won = [i for i in range(10) if s1[i] > s2[i]]
+    if not won:
+        return 0
+    base_score = sum(tower_pts[i] for i in won)
+    min_margin = min(s1[i] - s2[i] for i in won)
+    min_margin_towers = [i for i in won if s1[i] - s2[i] == min_margin]
+    target_tower = max(min_margin_towers)
+    return base_score + tower_pts[target_tower]
+
 
 
 # All previous scenarios at the same time, combined together!!!

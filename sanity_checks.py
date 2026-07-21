@@ -190,4 +190,24 @@ def sanity_check(scenario):
        assert score([0, 0, 0, 0, 0, 0, 0, 0, 0, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 59.5
        assert score([0, 0, 0, 0, 0, 0, 0, 0, 0, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0, 1]) == 49.5
 
+    # w71: any tower won with exactly 20 soldiers is worth double
+    if scenario == "w71":
+        assert score([20, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 2
+        assert score([21, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 1
+        assert score([20, 0, 0, 0, 0, 0, 0, 0, 0, 0], [20, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 0
+        assert score([0, 0, 0, 0, 0, 0, 0, 0, 0, 20], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 20
+
+    # w72: highest-indexed tower won is worth 0
+    if scenario == "w72":
+        assert score([1, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 0
+        assert score([1, 1, 1, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 3
+        assert score([1, 0, 0, 0, 0, 0, 0, 0, 0, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 1
+        assert score([1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 45
+
+    # w73: tower won by smallest positive margin is worth double; ties broken by highest-indexed tower
+    if scenario == "w73":
+        assert score([5, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 2
+        assert score([10, 2, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 5
+        assert score([3, 0, 3, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 7
+
     # There is no sanity check for omni-score scenario because it is not sane.
