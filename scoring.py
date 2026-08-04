@@ -22,6 +22,9 @@ def score(s1, s2):
     "w71": w71_score,
     "w72": w72_score,
     "w73": w73_score,
+    "w81": w81_score,
+    "w82": w82_score,
+    "w83": w83_score,
     "wo11": wo11_score,
     "wo12": wo12_score,
     "wo21": wo21_score,
@@ -421,6 +424,42 @@ def w73_score(s1, s2):
     min_margin_towers = [i for i in won if s1[i] - s2[i] == min_margin]
     target_tower = max(min_margin_towers)
     return base_score + tower_pts[target_tower]
+
+
+# Scenario 1: If a player wins a tower using strictly fewer soldiers than the average number of soldiers they allocated across all towers, that tower is worth double.
+def w81_score(s1, s2):
+    avg_s1 = sum(s1) / len(s1)
+    score = 0
+    for i in range(10):
+        if s1[i] > s2[i]:
+            if s1[i] < avg_s1:
+                score += tower_pts[i] * 2
+            else:
+                score += tower_pts[i]
+    return score
+
+# Scenario 2: For each tower i that a player won, that tower is worth an additional k points, where k is the number of towers from i+1 to 10 that the player lost (i.e. won by the opponent).
+def w82_score(s1, s2):
+    score = 0
+    for i in range(10):
+        if s1[i] > s2[i]:
+            k = sum(1 for j in range(i + 1, 10) if s2[j] > s1[j])
+            score += tower_pts[i] + k
+    return score
+
+# Scenario 3: If a tower i is won, but towers i-1 and i+1 are both lost (not tied), it is worth triple. Towers 1 and 10 are exempt from this rule because they have no side towers.
+def w83_score(s1, s2):
+    won = [s1[i] > s2[i] for i in range(10)]
+    lost = [s1[i] < s2[i] for i in range(10)]
+    s1_score = 0
+    for i in range(10):
+        if won[i]:
+            if 0 < i < 9 and lost[i-1] and lost[i+1]:
+                s1_score += tower_pts[i] * 3
+            else:
+                s1_score += tower_pts[i]
+    return s1_score
+
 
 
 

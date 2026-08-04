@@ -77,6 +77,13 @@ Each scenario modifies how tower victories translate into points:
 | `w52` | If you win the same number of towers among Towers 1-5 as Towers 6-10, each won tower is worth **+2 points** |
 | `w61` | You win a tower iff you place **at least 10 more** soldiers there than the opponent |
 | `w62` | Exact same as `wo63` and reroutes to it (each unused soldier earns **0.5 points**) |
+| `w71` | Towers won with **exactly 20 soldiers** are worth **double** |
+| `w72` | The **highest-indexed tower** you win is worth **0 points** |
+| `w73` | The tower won by the **smallest positive margin** is worth **double** (ties broken by highest-indexed tower) |
+| `w81` | Won tower using **strictly fewer soldiers than average allocation** across all towers is worth **double** |
+| `w82` | Each won tower $i$ is worth an additional **$k$ points**, where $k$ is the number of towers from $i+1$ to 10 that you lost (won by opponent) |
+| `w83` | If a won tower $i$ is flanked by two lost towers ($i-1$ and $i+1$, not tied), it is worth **triple** (Towers 1 and 10 exempt) |
+
 
 ### Season 1 Scenarios (`wo*`)
 | Scenario | Rule |

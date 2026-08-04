@@ -210,4 +210,31 @@ def sanity_check(scenario):
         assert score([10, 2, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 5
         assert score([3, 0, 3, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 7
 
+    # w81: won tower with strictly fewer soldiers than average allocation is worth double
+    if scenario == "w81":
+        assert score([5, 5, 5, 5, 5, 15, 15, 15, 15, 15], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 70
+        assert score([10, 10, 10, 10, 10, 10, 10, 10, 10, 10], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 55
+        assert score([9, 10, 10, 10, 10, 10, 10, 10, 10, 11], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 56
+
+    # w82: for each won tower i, extra k points where k is number of towers from i+1 to 10 lost (won by opponent)
+    if scenario == "w82":
+        assert score([1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 55
+        assert score([10, 10, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 10, 10, 10, 10, 10, 10, 10, 10]) == 19
+        assert score([10, 0, 10, 0, 10, 0, 10, 0, 10, 0], [0, 10, 0, 10, 0, 10, 0, 10, 0, 10]) == 40
+
+    # w83: if a tower i is won, but towers i-1 and i+1 are both lost (not tied), it is worth triple; towers 1 and 10 are exempt
+    if scenario == "w83":
+        # Tower 2 (worth 2) won, Tower 1 and 3 lost -> 2*3 = 6
+        assert score([0, 5, 0, 0, 0, 0, 0, 0, 0, 0], [1, 0, 1, 0, 0, 0, 0, 0, 0, 0]) == 6
+        # Tower 1 (worth 1) won, Tower 2 lost -> exempt from rule, worth 1
+        assert score([5, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 1, 0, 0, 0, 0, 0, 0, 0, 0]) == 1
+        # Tower 10 (worth 10) won, Tower 9 lost -> exempt from rule, worth 10
+        assert score([0, 0, 0, 0, 0, 0, 0, 0, 0, 5], [0, 0, 0, 0, 0, 0, 0, 0, 1, 0]) == 10
+        # Tower 2 won, but Tower 1 TIED (not lost) -> NOT triple, worth 2
+        assert score([0, 5, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 1, 0, 0, 0, 0, 0, 0, 0]) == 2
+        # Tower 2 won, Tower 1 lost, Tower 3 won -> NOT triple, Tower 2 worth 2, Tower 3 worth 3 -> Total 5
+        assert score([0, 5, 5, 0, 0, 0, 0, 0, 0, 0], [1, 0, 0, 0, 0, 0, 0, 0, 0, 0]) == 5
+
+
+
     # There is no sanity check for omni-score scenario because it is not sane.
