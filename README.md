@@ -25,6 +25,7 @@ blotto/
     ├── w73_algos.txt
     ├── my_algos.txt       #   ↳ My strategies
     ├── extra_algos.txt    #   ↳ User-curated additional strategies
+    ├── topcut_algos.txt   #   ↳ Output: top 200 ranked strategies from the last run
     └── out_algos.txt      #   ↳ Output: ranked results from the last run from best to worst
 ```
 
@@ -134,6 +135,12 @@ python blotto.py --SCORE_MODE w41 --extend_algos w11 w12 extra --MODE 3 --SHOW_A
 - `--SHOW_ALL_SCORES`: Prints the full leaderboard (`--no-SHOW_ALL_SCORES` to truncate).
 
 Results are written to `algos/out_algos.txt`, ranked best-to-worst.
+
+### Topcut Feature
+
+Whenever an optimization or tournament run finishes, the **topcut** feature automatically isolates and writes the top 200 performing strategies to `algos/topcut_algos.txt`. 
+
+This filtered pool can be passed directly into subsequent Arena Mode runs (e.g., `--extend_algos topcut`) to iteratively train and evolve strategies against elite opponent pools while shedding weak strategies.
 
 ### Viewing Strategies
 

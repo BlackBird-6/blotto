@@ -25,9 +25,6 @@ def main():
     # SHOW_ALL_SCORES: Whether to show all scores or just the top and bottom 10 (Modes 1/2)
     # SHOW_ALL_TOURNEY_SCORES: SHOW_ALL_SCORES (Modes 3/4)
 
-
-
-
     ############### EDIT THESE ##############    
     SCORE_MODE = "w82"
     extend_algos = ["topcut"]
